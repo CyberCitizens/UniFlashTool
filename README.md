@@ -17,7 +17,7 @@ As a tenet, I wanted to keep things transparent and secure. That's why this proj
 
 ## How does it work ?
 
-1. It fetches releases from [Magisk](https://github.com/topjohnwu/magisk), [PlayIntegrityFix](https://github.com/KOWX712/PlayIntegrityFix) and websites like those of [LineageOS](https://wiki.lineageos.org/devices) and [OrangeFox](https://orangefox.download).
+1. It fetches releases from [Magisk](https://github.com/topjohnwu/magisk), [PlayIntegrityFix](https://github.com/KOWX712/PlayIntegrityFix) and websites like those of [LineageOS](https://wiki.lineageos.org/devices) and [OrangeFox](https://orangefox.download). In reality, any website you'd like ! You can chose your tools.
 2. It downloads latest releases for your model (if available) using its codename with your consent.
 3. It asks you how to modify your device:
 	- Do we root it ?
@@ -37,7 +37,7 @@ My work is **CLEARLY NOT** the most amazing one in there. This project is fully 
 - [PlayIntegrityFix](https://github.com/KOWX712/PlayIntegrityFix), transforms a rooted-sovereign brick into a recognized and authentic Device to use with (almost) any app
 - [LineageOS](https://wiki.lineageos.org/devices), my custom ROM of choice because of its outstanding range of supported devices
 
-I'm just providing a front-end to these incredible tools, without them this project would be nothing.
+I'm just providing a front-end to these incredible tools, and a package manager for them. Without them this project would be nothing.
 
 Huge shoutouts and warm thanks to them !!
 
@@ -53,23 +53,43 @@ If you derive or redistribute UniFlashTool, you must:
 Flashing can **brick your device** 🧱. Backup everything. Test on throwaways first. No liability—use at your risk. GPL-3.0 licensed.
 
 ## Quick Start
-1. Download binaries (Win/Mac/Linux) from Releases.
-2. Connect phone in fastboot: `app.exe detect` (or GUI button).
-3. Enter codename (e.g., "beryllium" for Poco F1).
-4. Hit "Collect Tools" → checkboxes → "Flash Everything".
-5. Follow on-screen steps.
+0. Save your data on an external drive, because everything on your phone will be deleted
+1. Download binaries (Win/Mac/Linux) from Releases (if available, or build from source).
+2. Connect phone using USB (USB-A works better).
+3. Enter codename (e.g., "beryllium" for Poco F1) or let UniFlashTool detect it for you.
+4. Hit Repository settings if you don't want to use the default tools, and set up your own.
+5. Flash em' all these images and programs.
+6. Check if everything still works (if not, flash again but DON'T DISCONNECT YOUR PHONE)
+7. Enjoy your new custom OS
 
 ## Supported
 - Android bootloader/fastboot/OrangeFox devices.
 - Popular codenames via Lineage/OrangeFox lookup.
-- Bundles adb/fastboot—no install needed.
+- Codename auto-detection
+- Custom tool addition via local repository, sort em' by device codename and tools versions
+- Pick your tools from any website that host archives, or get them directly via GitHub with UFT GitHub utility integration
+
+### Host operating systems
+
+Windows, MacOS and Linux are all supported as hosts for this project.
+
+It was intended to be cross-platform, and leave behind the need to use tools such as WSL (Windows Subsystem for Linux) or emulators to do such a simple task as download a program and flash it on a partition.
+
 
 ## Build It
 ```bash
 git clone --recursive
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j$(nproc)
+./build.sh
 ```
 
+Yeah that wasn't hard gng sorry if this was obvious 🥀
 
+## Footnote
+
+This project was initially started on March, 12 2026, and will receive future updates (it's not finished yet !)
+
+Anyway, thanks for using this tool if you do, or to talk about it with your people. It's really important we finally understand the importance of getting more control over our data, and our devices in general. I'm trying to make this all more simple. If you wish to contribute, check [this file](CONTRIBUTING.md) when it'll come out and learn about my coding practices in [this one](STYLE.md).
+
+Together we can do something big !
+
+Stay tuned fam 🗿
