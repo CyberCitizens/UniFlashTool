@@ -17,3 +17,24 @@ I'm using an in-between the Unix and Microsoft object-oriented convention:
 - Methods and functions follow the same style, they're named in UpperCamelCase.
 	- *If you didn't know, methods are the functions inside a class, while functions aren't related
 	to objects !*
+- I use sneaky_case only for C-only implementations among all C++ code
+
+## Style
+
+I prefer to align my code using tabs, to keep same-characters on the same start and ending columns.
+
+But as long as your code is correctly indented, do as you wish !
+
+Also, I usually put my brace after a newline character in my body declarations:
+```cpp
+void LikeThis()
+{
+	// ...
+}
+
+void NotLikeThis() {
+	// ...
+}
+```
+
+But it's okay if you don't, I myself get sometimes confused and put it the "wrong" (for me) way.
