@@ -1,0 +1,35 @@
+{
+	"Looking for Android tools..." : "Recherche des outils Android...",
+	"ADB ready !" : "ADB est prêt !",
+	"ADB not found. Install it first." : "ADB n'a pas pu être trouvé. Installez-le et réessayez.",
+	"Fastboot ready !" : "Fastboot est prêt !",
+	"Fastboot not found. Install it first." : "Fastboot n'a pas pu être trouvé. Installez-le et réessayez.",
+	"About your tools" : "À propos de vos outils",
+	"Your device can communicate with an Android device. Congrats !" :
+		"Votre appareil est prêt à communiquer avec un appareil Android. Félicitations !",
+	"Need your consent to perform installations" : "Besoin de votre consentement afin de faire quelques installations",
+	"In order to communicate with the Android device, we need to install Android Debug Bridge and Fastboot first. Do you consent to do this ?":
+		"Afin de communiquer avec votre appareil Android, nous devons installer Android Debug Bridge et Fastboot en premier lieu. Consentez-vous à faire ça ?",
+	"Downloading ADB and Fastboot..." : "Téléchargement d'Android Debug Bridge et de Fastboot...",
+	"Installation was successful." : "Installé avec succès..",
+	"An error occurred while trying to install Android debug tools... Retrying...":
+		"Une erreur est survenue lors de l'installation des outils de débogage Android. Nouvel essai en cours...",
+	"Important information" : "Important information",
+	"You refused to download ADB and Fastboot automatically. You can download it by yourself and include it in your PATH environment variable, and try again. If you don't, you won't be able to communicate with your Android device.":
+		"Vous avez refusé de télécharger ADB et Fastboot automatiquement. Vous pouvez le faire manuellement et vous assurer qu'ils son inclus dans votre variable d'environnement PATH. Si vous ne le faites pas, vous ne pourrez pas communiquer avec votre appreil Android.",
+	"Setup ADB/Fastboot" : "Configurer ADB/Fastboot",
+	"Flash Everything" : "Lancer la procédure de flash",
+	"Add local repository" : "Ajouter un dépôt local",
+	"Add external tool to local repository" : "Ajouter un outil tiers à un dépôt local",
+	"Add existing or new local repository path" : "Ajouter un dépôt local existant ou en créer un nouveau",
+	"List of currently used local repositories:" : "Liste des dépôts locaux actuellement utilisés:",
+	"Manual installation" : "Installation manuelle",
+	"Auto installation failed. This is usually expected. To install needed tools and proceed, please copy and paste the following command in a terminal:\n\n<pre>%1</pre>":
+		"L'installation automatique a échoué. C'est généralement attendu, mais pour installer les outils nécessaires avec succès, veuillez copier et coller la commande suivante dans un terminal:\n\n<pre>%1</pre>",
+	"Copy command" : "Copier la commande",
+	"Copied text to clipboard" : "Texte copié dans le presse-papiers",
+	"Successfully copied text to clipboard. Paste it in a terminal as an administrator (or sudo).":
+		"Texte copié dans le presse-papiers avec succès. Collez-le dans un terminal en tant qu'administrateur, puis appuyez sur le bouton \"Ok\".",
+	"Change Language" : "Changer de langue",
+	"Manage tools and repositories" : "Gérer les outils et dépôts installés"
+}
