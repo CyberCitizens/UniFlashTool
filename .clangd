@@ -1,0 +1,10 @@
+CompileFlags:
+  Add: 
+    - -I/usr/include/x86_64-linux-gnu/qt6
+    - -I/usr/include/x86_64-linux-gnu/qt6/QtCore
+    - -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets
+    - -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++/
+  Remove: [-W*]
+CompileCommands: build/compile_commands.json
+Index:
+  Background: Build

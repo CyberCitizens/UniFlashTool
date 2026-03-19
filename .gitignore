@@ -1,0 +1,5 @@
+#where we're compiling
+bin/
+build/
+.cache/
+.vscode/
