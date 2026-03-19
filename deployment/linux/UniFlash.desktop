@@ -1,6 +1,6 @@
 [Desktop Entry]
-Name=UniFlash
-Exec=uniflash
-Icon=uniflash
+Name=UniFlashTool
+Exec=uniflashTool
+Icon=uniflashTool
 Type=Application
 Categories=Utility

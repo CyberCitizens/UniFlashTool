@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.11)
 project(UniversalFlashingTool)
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Gui)
 qt_standard_project_setup()
-qt_add_executable(uniflash
+qt_add_executable(uniflashtool
 	src/main.cpp
 	src/gui/UniFlash.cpp
 	src/gui/UniFlash.hpp
@@ -15,10 +15,10 @@ qt_add_executable(uniflash
 )
 add_subdirectory(libs/curlpp)
 
-add_compile_options(uniflash -g)
+add_compile_options(uniflashtool -g)
 add_definitions(-w)
 
-target_link_libraries(uniflash PRIVATE 
+target_link_libraries(uniflashtool PRIVATE 
 	curlpp
     Qt6::Core 
     Qt6::Widgets 

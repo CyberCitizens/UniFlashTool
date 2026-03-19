@@ -10,6 +10,11 @@ Second of all; doing a video about flashing phones, I came accross the fact that
 
 As a tenet, I wanted to keep things transparent and secure. That's why this project is open source.
 
+> [!NOTE]
+> The name "UniFlashTool" is inspired by the generic idea of a universal flashing utility.
+> Similar concepts have been explored in other projects (e.g., UniFlash for PC BIOS flashing),
+> but this implementation is written from scratch in C++/Qt for Android.
+
 ## How does it work ?
 
 1. It fetches releases from [Magisk](https://github.com/topjohnwu/magisk), [PlayIntegrityFix](https://github.com/KOWX712/PlayIntegrityFix) and websites like those of [LineageOS](https://wiki.lineageos.org/devices) and [OrangeFox](https://orangefox.download).
@@ -37,7 +42,15 @@ I'm just providing a front-end to these incredible tools, without them this proj
 Huge shoutouts and warm thanks to them !!
 
 ## ⚠️ Disclaimer
-Flashing can **brick your device**. Backup everything. Test on throwaways first. No liability—use at your risk. GPL-3.0 licensed.
+
+This software is released under the GNU GPLv3.
+
+If you derive or redistribute UniFlash, you must:
+ - Keep the GPL license.
+ - Credit the original author (your name or GitHub).
+ - Publish the source of your derived version.
+ 
+Flashing can **brick your device** 🧱. Backup everything. Test on throwaways first. No liability—use at your risk. GPL-3.0 licensed.
 
 ## Quick Start
 1. Download binaries (Win/Mac/Linux) from Releases.
