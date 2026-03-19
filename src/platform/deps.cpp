@@ -108,15 +108,15 @@ namespace uft::Platform
 			// auto install failed, prompt the user to install the tools themselves
 			QMessageBox manualInstall(0);
 			manualInstall.setTextFormat(Qt::TextFormat::RichText);
-			manualInstall.setWindowTitle(uft::t("Manual installation"));
-			manualInstall.setInformativeText(uft::t("Auto installation failed. This is usually expected. To install needed tools and proceed, please copy and paste the following command in a terminal:\n\n<pre>%1</pre>").arg(installCommand.c_str()));
-			QPushButton *copy = manualInstall.addButton(uft::t("Copy command"), QMessageBox::ActionRole);
+			manualInstall.setWindowTitle(uft::qt("Manual installation"));
+			manualInstall.setInformativeText(uft::qt("Auto installation failed. This is usually expected. To install needed tools and proceed, please copy and paste the following command in a terminal:\n\n<pre>%1</pre>").arg(installCommand.c_str()));
+			QPushButton *copy = manualInstall.addButton(uft::qt("Copy command"), QMessageBox::ActionRole);
 			manualInstall.exec();
 
 			if(manualInstall.clickedButton() == copy)
 			{
 				QGuiApplication::clipboard()->setText(installCommand.c_str());
-				QMessageBox :: information(0, uft::t("Copied text to clipboard"), uft::t("Successfully copied text to clipboard. Paste it in a terminal as an administrator (or sudo)."));
+				QMessageBox :: information(0, uft::qt("Copied text to clipboard"), uft::qt("Successfully copied text to clipboard. Paste it in a terminal as an administrator (or sudo)."));
 			}
 		}
 		return CheckForCommandExecution(exec);

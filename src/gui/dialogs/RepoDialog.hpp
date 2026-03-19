@@ -42,7 +42,7 @@ private:
 	QLineEdit	*toolDeviceString	= new QLineEdit;
 
 	// Saves the current configuration for this tool
-	QPushButton	*saveTool			= new QPushButton(::uft::t("Save configuration for this tool"));
+	QPushButton	*saveTool			= new QPushButton(::uft::qt("Save configuration for this tool"));
 
 
 //private slots:

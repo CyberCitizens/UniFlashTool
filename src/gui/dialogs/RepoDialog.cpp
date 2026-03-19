@@ -3,12 +3,12 @@
 
 RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler>& repos, QWidget* parent) : QDialog(parent), Repos{repos}
 {
-	setWindowTitle(::uft::t("Manage local repositories"));
+	setWindowTitle(::uft::qt("Manage local repositories"));
 	resize(500, 400);
-	QPushButton *addRepo		= new QPushButton(uft::t("Add local repository"));
-	QPushButton *addTool		= new QPushButton(uft::t("Add tool to current repository"));
+	QPushButton *addRepo		= new QPushButton(uft::qt("Add local repository"));
+	QPushButton *addTool		= new QPushButton(uft::qt("Add tool to current repository"));
 
-	QPushButton	*addGithubTool	= new QPushButton(::uft::t("Add a tool from GitHub"));
+	QPushButton	*addGithubTool	= new QPushButton(::uft::qt("Add a tool from GitHub"));
 
 	auto *layout = new QHBoxLayout(this);
 	auto *repoListLayout = new QVBoxLayout;
@@ -73,7 +73,7 @@ void RepoDialog::AddLocalRepo()
 {
 	QString folderPath = QFileDialog::getExistingDirectory(
 		this,													// Parent widget
-		uft::t("Add existing or new local repository path"),	// Title  
+		uft::qt("Add existing or new local repository path"),	// Title  
 		QDir::homePath()										// Start in home dir
 	);
 	Repos.push_back(

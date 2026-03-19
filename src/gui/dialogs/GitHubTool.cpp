@@ -4,7 +4,7 @@ GitHubTool::GitHubTool(QWidget* parent) : QDialog{parent}
 {
 	setModal(true);
 
-	setWindowTitle(uft::t("Github tools modal"));
+	setWindowTitle(uft::qt("Github tools modal"));
 	auto* author = new QTextBlock;
 	
 }

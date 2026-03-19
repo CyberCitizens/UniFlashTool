@@ -34,7 +34,7 @@ namespace uft
 			::std::shared_lock<::std::shared_mutex> _slm(langMutex);
 			if(jsonLangData && loadedLang == lang)
 				if(jsonLangData->contains(string))
-					return (*jsonLangData)[string].get<T>();
+					return (*jsonLangData)[string].get_ref<T const&>();
 				else
 					return string;
 		}
@@ -48,25 +48,21 @@ namespace uft
 		jsonLangData = ::nlohmann::json();
 		langFile >> *jsonLangData;
 		if(jsonLangData->contains(string))
-			return (*jsonLangData)[string].get<T>();
+			return (*jsonLangData)[string].get_ref<T const&>();
 		// fallback in case nothing's found in the language file
 		return string;
 	}
 
-	template ::std::string const& t<::std::string>(::std::string const& string);
+	template ::std::string const& t<::std::string const&>(::std::string const& string);
 	template<> inline char const * const& t<char const* const&>(::std::string const& string)
 	{
 		return t<::std::string>(string).c_str();
 	}
-	template<> inline QString const& t<QString>(::std::string const& string)
+
+	// Translates string into a QString copy of a single string.
+	inline QString qt(::std::string const& string)
 	{
 		return QString::fromStdString(t<::std::string>(string));
-	}
-
-	// converts literals into QStrings when needed
-	template<size_t N>
-	QString t(const char (&literal)[N]) {
-		return t<QString>(std::string(literal));
 	}
 }
 

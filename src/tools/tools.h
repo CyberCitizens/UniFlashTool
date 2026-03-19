@@ -9,6 +9,7 @@
 #include <fstream>
 #include <regex>
 #include <format>
+#include <map>
 #include "../gui/Translate.hpp"
 
 namespace uft::Tools
