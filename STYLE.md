@@ -38,3 +38,5 @@ void NotLikeThis() {
 ```
 
 But it's okay if you don't, I myself get sometimes confused and put it the "wrong" (for me) way.
+
+Anyway, thanks for having that read done ! It's really useful if you wish to contribute, or if you want to understand the code more easily. It's really important to me that my program is easily accessible for everyone.
