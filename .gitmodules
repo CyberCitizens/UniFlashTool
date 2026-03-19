@@ -1,0 +1,6 @@
+[submodule "libs/wxWidgets"]
+	path = libs/wxWidgets
+	url = https://github.com/wxWidgets/wxWidgets
+[submodule "libs/curlpp"]
+	path = libs/curlpp
+	url = https://github.com/jpbarrette/curlpp
