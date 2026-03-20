@@ -1,8 +1,9 @@
 {
 	"repo_path": "data/repos/default",
-	"timestamp": 1773981147,
+	"timestamp": 1773990181,
 	"tools": [
 		{
+			"archive_name": "lineage-23.2-20260319-nightly-sweet-signed.zip",
 			"name": "LineageOS",
 			"source": "https://mirrorbits.lineageos.org/full/sweet/20260319/lineage-23.2-20260319-nightly-sweet-signed.zip",
 			"source_type": 1,

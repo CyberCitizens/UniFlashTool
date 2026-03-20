@@ -113,6 +113,8 @@ namespace uft::Tools
 				tool_data["source_type"] = *tool.SourceType;
 			if(tool.Version)
 				tool_data["version"] = *tool.Version;
+			if(tool.ArchiveName)
+				tool_data["archive_name"] = *tool.ArchiveName;
 			data["tools"].push_back(tool_data);
 		}
 
@@ -141,6 +143,8 @@ namespace uft::Tools
 				tool.Name 		= tool_data.value("name", "");
 				tool.Type 		= static_cast<TOOL_TYPE>(tool_data.value("type", 0));
 				tool.SourceType = static_cast<SOURCE_TYPE>(tool_data.value("source_type", 0));
+				if(tool_data.contains("archive_name") && !tool_data["archive_name"].is_null())
+					tool.ArchiveName = tool_data["archive_name"];
 				if(tool_data.contains("target_device") && !tool_data["target_device"].is_null())
 					tool.TargetDevice = tool_data["target_device"];
 				if(tool_data.contains("source") && !tool_data["source"].is_null())
@@ -303,8 +307,10 @@ namespace uft::Tools
 		if(tool.ArchiveName && ::std::filesystem::exists(toolPath + "/" + *tool.ArchiveName) && !forceDownload)
 			return toolPath + "/" + *tool.ArchiveName;
 		else
+		{
 			if(Download(tool, *tool.Source))
 				return LocalRepoPath + "/" + *tool.ArchiveName;
+		}
 		return ::uft::st("An error occurred while trying to retrieve a referenced tool.");
 	}
 
