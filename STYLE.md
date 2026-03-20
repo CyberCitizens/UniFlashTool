@@ -18,6 +18,7 @@ I'm using an in-between the Unix and Microsoft object-oriented convention:
 	- *If you didn't know, methods are the functions inside a class, while functions aren't related
 	to objects !*
 - I use sneaky_case only for C-only implementations among all C++ code
+- Methods that returns a reference of their instance should be written in camelCase.
 
 ## Style
 

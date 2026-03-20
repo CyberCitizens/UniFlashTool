@@ -30,7 +30,7 @@ private slots:
 	void AddToolToRepo();
 
 private:
-	::std::vector<::uft::Tools::ToolHandler> Repos;
+	::std::vector<::uft::Tools::ToolHandler*> Repos;
 	QTextEdit *log;
 
 	void setupUI();

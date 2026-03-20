@@ -30,5 +30,15 @@
 	"Copied text to clipboard" : "Copied text to clipboard",
 	"Successfully copied text to clipboard. Paste it in a terminal as an administrator (or sudo).":
 		"Successfully copied text to clipboard. Paste it in a terminal as an administrator (or sudo), and click on \"Ok\" button.",
-	"Change Language" : "Change Language"
+	"Change Language" : "Change Language",
+	"Tool to edit" : "Tool to edit",
+	"Tool name" : "Tool name",
+	"Tool type" : "Tool type",
+	"Tool target device" : "Tool target device",
+	"Tool source URL" : "Tool source URL",
+	"Type of downloaded archive" : "Type of downloaded archive",
+	"Save tool configuration" : "Save tool configuration",
+	"Repository settings for " : "Repository settings for ",
+	"Add tool to current repository" : "Add tool to current repository",
+	"Add a tool from GitHub" : "Add a tool from GitHub"
 }

@@ -6,9 +6,12 @@
 #include <qdialog.h>
 #include <qlabel.h>
 #include <QTextBlock>
+#include "../elements/LabeledWidget.hpp"
 
 class GitHubTool : public QDialog
 {
+	private:
+	::uft::Tools::ToolHandler* Repo;
 	public:
-	GitHubTool(QWidget* parent = 0);
+	GitHubTool(::uft::Tools::ToolHandler* const repo, QWidget* parent = 0);
 };

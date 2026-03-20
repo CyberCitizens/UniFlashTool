@@ -3,3 +3,5 @@ bin/
 build/
 .cache/
 .vscode/
+data/repos/default/
+!*repo.json

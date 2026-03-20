@@ -73,5 +73,10 @@ namespace uft::Tools::Flash
 		return Platform::RunCommand("fastboot", { "boot", QString::fromStdString(imagePath)});
 	}
 
+	::std::string const EnsureADB()
+	{
+		return Platform::RunCommand("adb", { "start-server" });
+	}
+
 }
 

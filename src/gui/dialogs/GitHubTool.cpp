@@ -1,6 +1,6 @@
 #include "GitHubTool.hpp"
 
-GitHubTool::GitHubTool(QWidget* parent) : QDialog{parent}
+GitHubTool::GitHubTool(::uft::Tools::ToolHandler* const repo, QWidget* parent) : QDialog{parent}, Repo{repo}
 {
 	setModal(true);
 

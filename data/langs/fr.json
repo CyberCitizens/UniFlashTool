@@ -31,5 +31,15 @@
 	"Successfully copied text to clipboard. Paste it in a terminal as an administrator (or sudo).":
 		"Texte copié dans le presse-papiers avec succès. Collez-le dans un terminal en tant qu'administrateur, puis appuyez sur le bouton \"Ok\".",
 	"Change Language" : "Changer de langue",
-	"Manage tools and repositories" : "Gérer les outils et dépôts installés"
+	"Manage tools and repositories" : "Gérer les outils et dépôts installés",
+	"Tool to edit" : "Outil à modifier",
+	"Tool name" : "Nom de l'outil",
+	"Tool type" : "Type d'outil",
+	"Tool target device" : "Appareil cible de l'outil",
+	"Tool source URL" : "URL source de l'outil",
+	"Type of downloaded archive" : "Type d'archive téléchargée",
+	"Save tool configuration" : "Sauvegarder la configuration de l'outil",
+	"Repository settings for " : "Paramètres du dépôt: ",
+	"Add tool to current repository" : "Ajouter un outil au dépôt actuel",
+	"Add a tool from GitHub" : "Ajouter un outil depuis GitHub"
 }

@@ -5,6 +5,7 @@
 #include <QString>
 #include <fstream>
 #include <shared_mutex>
+#include <thread>
 
 namespace uft
 {
@@ -57,6 +58,11 @@ namespace uft
 	template<> inline char const * const& t<char const* const&>(::std::string const& string)
 	{
 		return t<::std::string>(string).c_str();
+	}
+
+	inline ::std::string st(::std::string const& string)
+	{
+		return t<::std::string>(string);
 	}
 
 	// Translates string into a QString copy of a single string.

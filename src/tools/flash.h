@@ -8,6 +8,7 @@
 #include "tools.h"
 
 // This file provides a useful range of functions to easily flash a phone entierely.
+// Basically ADB and FastBoot tools.
 
 namespace uft::Tools::Flash
 {
@@ -64,6 +65,8 @@ namespace uft::Tools::Flash
 	DEVICE_STATE const GetConnectedDeviceState();
 	// Reboots a device to its bootloader, enabling fastboot commands.
 	::std::string const RebootToBootloader();
+	// Ensures ADB is running, starts a new server if no server is connected, and returns the result output.
+	::std::string const EnsureADB();
 	namespace FastBoot
 	{
 		// Returns true if a device is connected with fastboot, false if not.

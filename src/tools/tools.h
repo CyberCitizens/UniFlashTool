@@ -82,7 +82,7 @@ namespace uft::Tools
 		// Source URI to get this tool
 		::std::optional<::std::string> Source;
 		::std::optional<::std::string> Version; // A specific tag to look for in the versioning system (tag, release, etc.)
-		::std::optional<::std::string> LocalPath; // Local path from Repository root to actual tool files
+		::std::optional<::std::string> ArchiveName; // Downloaded Archive name (from "{RepositoryRoot}/{ToolName}/" path).
 		size_t Size() const
 		{
 			size_t size = sizeof(char) * Name.size() + sizeof(Type) + sizeof(SourceType);
@@ -97,24 +97,37 @@ namespace uft::Tools
 	class ToolHandler
 	{
 		protected:
+			::std::shared_mutex RepoMutex;
+			static ::std::shared_mutex RepoListMutex; // This one is protecting the static repositories list
+		
+			static ::std::map<::std::string const, ToolHandler*> Repos; // list of instantiated repositories and their paths
 			// Path to the local repository of tools
 			::std::string LocalRepoPath;
 			// Tools that are already downloaded in this local repo
 			::std::vector<Tool> LocalTools;
 			// Downloads 
 			bool Download(Tool& tool, ::std::string const& source);
-		public:
 			// initiates a ToolHandler with a path pointing to the local tools repository.
-			ToolHandler(::std::string localRepo);
+			ToolHandler(::std::string const& localRepo);
+			
+			static ::std::string const DEFAULT_PATH;
+		public:
+			static ::std::map<::std::string const, ToolHandler*> GetAllRepos();
+			// Returns the default repository
+			static ToolHandler* GetDefault();
+			// Gets or creates a new repo instance bases on if one with the same path already exists.
+			static ToolHandler* GetOrCreateRepo(::std::string const& path);
 			// Saves this repo state in the folder it was assigned at.
 			// Typically creates a binary file containing raw URL and tool types / sources to get in case one is corrupted.
 			// This permits easy exchange with other users too, as they can share their repository configuration
 			// and quickly get the same tools.
 			bool Save();
 			// Loads a local repository configuration.
-			static ToolHandler Load(::std::string const& RepoPath);
+			static ToolHandler* Load(::std::string const& RepoPath);
 			// Returns the path to given tool, and if not present, downloads it prior to returning its local path.
-			::std::string Get(Tool& tool);
+			::std::string Get(Tool& tool, bool forceDownload = false);
+			// Simply adds a tool and tries to download it in repository.
+			void AddTool(Tool tool);
 			// Finds the associated tool with toolName, and returns it, if present.
 			// Also downloads it if it's present but not downloaded.
 			::std::optional<Tool> Get(::std::string const& toolName);
@@ -123,6 +136,11 @@ namespace uft::Tools
 
 			// Getter for LocalRepoPath.
 			::std::string GetPath() const;
+
+			// Helper to know if any tool is present in this repository efficiently.
+			bool HasTools() const;
+
+			~ToolHandler();
 	};
 }
 #endif
