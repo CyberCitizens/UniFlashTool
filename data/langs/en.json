@@ -40,5 +40,7 @@
 	"Save tool configuration" : "Save tool configuration",
 	"Repository settings for " : "Repository settings for ",
 	"Add tool to current repository" : "Add tool to current repository",
-	"Add a tool from GitHub" : "Add a tool from GitHub"
+	"Add a tool from GitHub" : "Add a tool from GitHub",
+	"The current user must be added to the \"android\" group before UniFlashTool can use Android tools.\n\nTo do this, please run <pre>%1</pre> in a terminal, as administrator."
+		: "The current user must be added to the \"android\" group before UniFlashTool can use Android tools.\n\nTo do this, please run <pre>%1</pre> in a terminal, as administrator."
 }

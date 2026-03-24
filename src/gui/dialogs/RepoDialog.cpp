@@ -193,11 +193,11 @@ void RepoDialog::AddTool(uft::Tools::ToolHandler* const repo)
 {
 	::uft::Tools::Tool newTool
 	{
-		.Name			= ::uft::st("New tool"),
-		.Source 		= "https://example.org/source/.git",
-		.SourceType 	= ::uft::Tools::SOURCE_TYPE::GITHUB_REPO,
 		.Type			= ::uft::Tools::TOOL_TYPE::ROM,
+		.SourceType 	= ::uft::Tools::SOURCE_TYPE::GITHUB_REPO,
+		.Name			= ::uft::st("New tool"),
 		.TargetDevice 	= ::uft::Tools::Flash::GetConnectedDeviceCodename(),
+		.Source 		= "https://example.org/source/.git",
 	};
 	
 	RefreshToolView(newTool);

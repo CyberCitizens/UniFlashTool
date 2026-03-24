@@ -1,0 +1,4 @@
+{
+	"addAndroidGroup"		: "sudo usermod -aG android $(id -u -n) && sudo usermod -aG plugdev $(id -u -n)",
+	"installAndroidTools"	: "sudo apt install adb && sudo apt install fastboot"
+}

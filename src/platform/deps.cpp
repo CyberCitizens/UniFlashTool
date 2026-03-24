@@ -94,7 +94,7 @@ namespace uft::Platform
 	bool InstallAndroidTools() {
 		::std::string installCommand;
 		switch (GetPlatform()) {
-			case PLATFORM::LINUX:   installCommand = "sudo apt update && sudo apt install -y android-tools-adb android-tools-fastboot";
+			case PLATFORM::LINUX:   installCommand = GetCommand(INSTALL_ANDROID_TOOLS);
 			break;
 			case PLATFORM::APPLE:   installCommand = "brew install android-platform-tools";
 			break;
@@ -127,4 +127,66 @@ namespace uft::Platform
 		return output.find(UFT_ERROR_TAG) == ::std::string::npos;
 	}
 
+	bool IsUserInGroup(::std::string const& group)
+	{
+		::std::string const output = RunCommand("id", { "-n", "-G" });
+		return output.find(group) != ::std::string::npos;
+	}
+
+	::std::string const GetCommand(COMMAND const command)
+	{
+		::std::string const COMMANDS_PATH = ::std::string("data/distro/") + GetDistroString() + ".json";
+		static ::nlohmann::json* commands;
+		if(!commands)
+		{
+			::std::ofstream commandsFile(COMMANDS_PATH);
+			if(!commandsFile.is_open())
+				return "ERROR: cannot open command reference file.";
+			::std::stringstream commandstrs; commandstrs << commandsFile.rdbuf();
+			commands = new ::nlohmann::json(commandstrs.str());
+		}
+		switch (command)
+		{
+			case INSTALL_ANDROID_TOOLS:
+				return (*commands)["installAndroidTools"];
+			case ADD_USER_TO_ANDROID_GROUP:
+				return (*commands)["addAndroidGroup"];
+		}
+		return ::uft::st("Error while trying to retrieve the correct command.");
+	}
+
+	LINUX_DISTRIBUTION const GetDistro()
+	{
+		char const * const OS_RELEASE_PATH = "/etc/os-release";
+		static LINUX_DISTRIBUTION L_D;
+		if(L_D)
+			return L_D;
+		::std::ofstream releaseFile(OS_RELEASE_PATH);
+		if(!releaseFile.is_open())
+			return GENERIC;
+		::std::stringstream release;
+		release << releaseFile.rdbuf();
+		::std::string const releaseContent = release.str();
+		size_t
+			beginName	= 5, // "NAME=" length
+			endName		= releaseContent.find('\n', beginName);
+		if(endName == ::std::string::npos)
+			return GENERIC; // error while reading the /etc/os-release file
+		::std::string const RELEASE_NAME = releaseContent.substr(beginName, endName - beginName);
+		if(LINUX_DISTRIBUTIONS.find(RELEASE_NAME) != LINUX_DISTRIBUTIONS.end())
+		{
+			L_D = LINUX_DISTRIBUTIONS.at(RELEASE_NAME);
+			return L_D;
+		}
+		return GENERIC;
+	}
+
+	::std::string const GetDistroString()
+	{
+
+		for (auto const _ldentry : LINUX_DISTRIBUTIONS)
+			if(_ldentry.second == GetDistro())
+				return _ldentry.first;
+		return "Generic";
+	}
 }

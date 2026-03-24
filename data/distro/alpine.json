@@ -1,0 +1,4 @@
+{
+	"addAndroidGroup"		: "doas usermod -aG android $(id -u -n) && doas usermod -aG plugdev $(id -u -n)",
+	"installAndroidTools"	: "doas apk add android-tools"
+}

@@ -32,6 +32,32 @@ namespace uft::Platform
 		APPLE,
 		LINUX,
 	};
+
+	// Enumeration used to know which package manager to use
+	enum LINUX_DISTRIBUTION
+	{
+		GENERIC,// don't provide any package manager command for a generic distro-it may be a custom.
+		DEBIAN,	// and every debian-based distribution
+		ARCH,	// and every other Arch-based distribution
+		GENTOO,	// because I use it
+		// will support later:
+		// FEDORA,
+		// REDHAT
+	};
+
+	enum COMMAND
+	{
+		INSTALL_ANDROID_TOOLS,		// Command to install Android tools like ADB and Fastboot
+		ADD_USER_TO_ANDROID_GROUP,	// Command to add current user to relevant Android groups and be able to use Android tools
+	};
+
+	static ::std::map<::std::string, LINUX_DISTRIBUTION> const LINUX_DISTRIBUTIONS
+	{
+		{	"Generic"	,	GENERIC	},
+		{	"Debian"	,	DEBIAN	},
+		{	"Arch"		,	ARCH	},
+		{	"Gentoo"	,	GENTOO	},
+	};
 	
 	// Returns an enum value telling the current platform we're working with.
 	PLATFORM GetPlatform();
@@ -49,5 +75,12 @@ namespace uft::Platform
 	bool InstallAndroidTools();
 	// Returns true if no error has been found in output.
 	bool CheckForCommandExecution(::std::string const& output);
+	// Returns true if the user is in the given group.
+	bool IsUserInGroup(::std::string const& group);
+	
+	::std::string const GetCommand(COMMAND const command);
+	// Get current Linux Distribution
+	LINUX_DISTRIBUTION const GetDistro();
+	::std::string const GetDistroString();
 }
 #endif

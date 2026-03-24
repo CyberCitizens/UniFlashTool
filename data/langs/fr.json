@@ -41,5 +41,7 @@
 	"Save tool configuration" : "Sauvegarder la configuration de l'outil",
 	"Repository settings for " : "Paramètres du dépôt: ",
 	"Add tool to current repository" : "Ajouter un outil au dépôt actuel",
-	"Add a tool from GitHub" : "Ajouter un outil depuis GitHub"
+	"Add a tool from GitHub" : "Ajouter un outil depuis GitHub",
+	"The current user must be added to the \"android\" group before UniFlashTool can use Android tools.\n\nTo do this, please run <pre>%1</pre> in a terminal, as administrator."
+		: "L'utilisateur actuel doit être ajouté au groupe \"android\" pour utiliser les outils Android avec UniFlashTool. Afin d'ajouter l'utilisateur au groupe, veuillez exécuter la commande <pre>%1</pre> dans un terminal de commande en tant qu'administrateur."
 }

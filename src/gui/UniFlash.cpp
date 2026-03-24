@@ -20,6 +20,10 @@ void UniFlash::SetupAndroidTools()
 		log->append(uft::qt("Fastboot ready !"));
 	else
 		log->append(uft::qt("Fastboot not found. Install it first."));
+	if(!::uft::Platform::IsUserInGroup("android"))
+		QMessageBox::warning(this, ::uft::qt("Warning regarding user groups"), 
+			::uft::qt("The current user must be added to the \"android\" group before UniFlashTool can use Android tools.\n\nTo do this, please run <pre>%1</pre> in a terminal, as administrator.").arg(::uft::Platform::GetCommand(::uft::Platform::COMMAND::ADD_USER_TO_ANDROID_GROUP))
+		);
 	if(allSet)
 		QMessageBox::information(
 			this,
