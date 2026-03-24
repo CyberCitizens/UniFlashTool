@@ -139,7 +139,7 @@ namespace uft::Platform
 		static ::nlohmann::json* commands;
 		if(!commands)
 		{
-			::std::ofstream commandsFile(COMMANDS_PATH);
+			::std::ifstream commandsFile(COMMANDS_PATH);
 			if(!commandsFile.is_open())
 				return "ERROR: cannot open command reference file.";
 			::std::stringstream commandstrs; commandstrs << commandsFile.rdbuf();
@@ -161,7 +161,7 @@ namespace uft::Platform
 		static LINUX_DISTRIBUTION L_D;
 		if(L_D)
 			return L_D;
-		::std::ofstream releaseFile(OS_RELEASE_PATH);
+		::std::ifstream releaseFile(OS_RELEASE_PATH);
 		if(!releaseFile.is_open())
 			return GENERIC;
 		::std::stringstream release;
