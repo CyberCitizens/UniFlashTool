@@ -15,6 +15,7 @@
 #include <qcombobox.h>
 #include <QTextBlock>
 #include <qlineedit.h>
+#include <QToolBar>
 #include "../../tools/flash.h"
 #include "GitHubTool.hpp"
 

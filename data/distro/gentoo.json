@@ -1,4 +1,4 @@
 {
 	"addAndroidGroup"		: "sudo usermod -aG android $(id -u -n) && sudo usermod -aG plugdev $(id -u -n)",
-	"installAndroidTools"	: "sudo emerge dev-util/android-tools"
+	"installAndroidTools"	: "sudo emerge dev-util/android-tools && sudo emerge dev-util/android-udev-rules"
 }

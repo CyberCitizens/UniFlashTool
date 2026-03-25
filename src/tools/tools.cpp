@@ -176,6 +176,7 @@ namespace uft::Tools
 				return total_size;
 			}
 		));
+		handle.perform();
 		return ss.str();
 	}
 

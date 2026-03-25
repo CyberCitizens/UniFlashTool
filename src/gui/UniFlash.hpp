@@ -15,6 +15,7 @@
 
 #include "dialogs/RepoDialog.hpp"
 #include "../tools/flash.h"
+#include "../tools/defaults/ROM.hpp"
 
 // The app class
 class UniFlash : public QWidget

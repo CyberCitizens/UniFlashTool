@@ -1,19 +1,8 @@
 #include "LabeledWidget.hpp"
 
-LabeledWidget* LabeledWidget::setSpacer(SPACERS spacers)
-{
-	this->spacers = spacers;
-	return this;
-}
-
-LabeledWidget* LabeledWidget::addSpacer(SPACERS spacers)
-{
-	this->spacers = (SPACERS)(this->spacers | spacers);
-	return this;
-}
-
 void LabeledWidget::Refresh()
 {
+	Clear();
 	if(spacers & LEFT)
 		addStretch();
 	addWidget(label);
@@ -22,7 +11,7 @@ void LabeledWidget::Refresh()
 		addStretch();
 }
 
-LabeledWidget::LabeledWidget(::std::string const& text, QWidget* widgetToParent, QWidget* parent, SPACERS spacers) : QHBoxLayout{parent}
+LabeledWidget::LabeledWidget(::std::string const& text, QWidget* widgetToParent, QWidget* parent, SPACERS spacers) : LayoutElement{widgetToParent, parent}
 {
 	this->spacers = spacers;
 	widget = widgetToParent;

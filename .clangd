@@ -1,10 +1,15 @@
 CompileFlags:
-  Add: 
-    - -I/usr/include/x86_64-linux-gnu/qt6
-    - -I/usr/include/x86_64-linux-gnu/qt6/QtCore
-    - -I/usr/include/x86_64-linux-gnu/qt6/QtWidgets
-    - -I/usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++/
-  Remove: [-W*]
+    Add: 
+        - -Wno-unknown-argument
+        - -Wno-unused-command-line-argument
+        - -I/usr/include/qt6
+        - -I/usr/include/qt6/QtCore
+        - -I/usr/include/qt6/QtWidgets
+    Remove: 
+        -W*
+        - -mno-direct-extern-access
+        - -fstrict-aliasing
+
 CompileCommands: build/compile_commands.json
 Index:
-  Background: Build
+    Background: Build

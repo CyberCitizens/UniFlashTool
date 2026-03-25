@@ -1,3 +1,6 @@
 [submodule "libs/curlpp"]
 	path = libs/curlpp
 	url = https://github.com/jpbarrette/curlpp
+[submodule "libs/libxmlpp"]
+	path = libs/libxmlpp
+	url = https://github.com/libxmlplusplus/libxmlplusplus

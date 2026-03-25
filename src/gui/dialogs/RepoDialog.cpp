@@ -28,12 +28,14 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 	);
 	auto* verticalRepoListLayout = new QVBoxLayout;
 	repoListLayout->addLayout(verticalRepoListLayout);
-	for(auto const& widget : ::std::initializer_list<QWidget*>{
-		addGithubTool,
-		addTool,
-		addRepo
+	for(auto const& widget : ::std::initializer_list<QLayout*>{
+		(new LabeledWidget(::uft::t<::std::string>("Tool to edit"), toolList))
+			->setSpacer(LabeledWidget::RIGHT),
+		(new LayoutElement(addGithubTool))->setSpacer(LayoutElement::RIGHT),
+		(new LayoutElement(addTool))->setSpacer(LayoutElement::RIGHT),
+		(new LayoutElement(addRepo))->setSpacer(LayoutElement::RIGHT)
 	})
-		verticalRepoListLayout->addWidget(widget);
+		verticalRepoListLayout->addLayout(widget);
 
 	for(auto const& _toolType : uft::Tools::TOOL_TYPES)
 		toolType->addItem(QString::fromStdString(_toolType.second));
@@ -45,8 +47,6 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 	toolDeviceString->setText(QString::fromStdString(deviceName).trimmed());
 
 	for(auto const& widget : ::std::initializer_list<QLayout*>{
-		(new LabeledWidget(::uft::t<::std::string>("Tool to edit"), toolList))
-			->setSpacer(LabeledWidget::RIGHT),
 		(new LabeledWidget(::uft::t<::std::string>("Tool name"), toolName))
 			->setSpacer(LabeledWidget::RIGHT),
 		(new LabeledWidget(::uft::t<::std::string>("Tool type"), toolType))
@@ -193,9 +193,9 @@ void RepoDialog::AddTool(uft::Tools::ToolHandler* const repo)
 {
 	::uft::Tools::Tool newTool
 	{
+		.Name			= ::uft::st("New tool"),
 		.Type			= ::uft::Tools::TOOL_TYPE::ROM,
 		.SourceType 	= ::uft::Tools::SOURCE_TYPE::GITHUB_REPO,
-		.Name			= ::uft::st("New tool"),
 		.TargetDevice 	= ::uft::Tools::Flash::GetConnectedDeviceCodename(),
 		.Source 		= "https://example.org/source/.git",
 	};

@@ -69,15 +69,18 @@ namespace uft::Tools
 		{ ANDROID_ARCHIVE,	::uft::t<::std::string>("Android Archive") },
 	};
 
+	::std::string const HttpGet(::std::string const& url);
+
+
 	typedef struct tool_t
 	{
 		public:
+		::std::string Name;
 		// Tool type; ROM, Rooting tool, Play Integrity Fix tool, etc.
 		TOOL_TYPE Type;
 		// What type of source is this tool coming from ? An archive, a repo to build / extract from ?
 		::std::optional<SOURCE_TYPE> SourceType;
 		// Name of this tool (local relative path to Repo location): lineageOS, magisk, etc.
-		::std::string Name;
 		::std::optional<::std::string> TargetDevice; // Device model name that this tool targets
 		// Source URI to get this tool
 		::std::optional<::std::string> Source;
