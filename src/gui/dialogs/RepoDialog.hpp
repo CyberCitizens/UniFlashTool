@@ -17,6 +17,7 @@
 #include <qlineedit.h>
 #include <QToolBar>
 #include "../../tools/flash.h"
+#include "../../tools/Config.hpp"
 #include "GitHubTool.hpp"
 
 

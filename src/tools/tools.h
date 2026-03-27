@@ -10,6 +10,9 @@
 #include <regex>
 #include <format>
 #include <map>
+#include <libxml/HTMLparser.h>
+#include <libxml/HTMLtree.h>
+#include <libxml/xpath.h>
 #include "../gui/Translate.hpp"
 
 namespace uft::Tools
@@ -60,6 +63,7 @@ namespace uft::Tools
 		GITHUB_REPO,	// Should look into releases, and if there's none, clone the repo (shallow-copy) and build
 		ARCHIVE,		// An archive (.7z, .zip, .tar.gz) will be downloaded from this source.
 		ANDROID_ARCHIVE,// An Android Archive (.apk) that needs to be translated into a standard archive before being sideloaded.
+		IMAGE,			// Like an archive but more based
 	};
 
 	::std::map<SOURCE_TYPE, ::std::string> const SOURCE_TYPES
@@ -67,6 +71,7 @@ namespace uft::Tools
 		{ GITHUB_REPO,		::uft::t<::std::string>("GitHub Repository") },
 		{ ARCHIVE,			::uft::t<::std::string>("Archive") },
 		{ ANDROID_ARCHIVE,	::uft::t<::std::string>("Android Archive") },
+		{ IMAGE,			::uft::t<::std::string>("Image Archive")	},
 	};
 
 	::std::string const HttpGet(::std::string const& url);
@@ -109,7 +114,7 @@ namespace uft::Tools
 			// Tools that are already downloaded in this local repo
 			::std::vector<Tool> LocalTools;
 			// Downloads 
-			bool Download(Tool& tool, ::std::string const& source);
+			bool Download(Tool* tool, ::std::string const& source);
 			// initiates a ToolHandler with a path pointing to the local tools repository.
 			ToolHandler(::std::string const& localRepo);
 			
@@ -128,12 +133,12 @@ namespace uft::Tools
 			// Loads a local repository configuration.
 			static ToolHandler* Load(::std::string const& RepoPath);
 			// Returns the path to given tool, and if not present, downloads it prior to returning its local path.
-			::std::string Get(Tool& tool, bool forceDownload = false);
+			::std::string Get(Tool tool, bool forceDownload = false);
 			// Simply adds a tool and tries to download it in repository.
 			void AddTool(Tool tool);
 			// Finds the associated tool with toolName, and returns it, if present.
 			// Also downloads it if it's present but not downloaded.
-			::std::optional<Tool> Get(::std::string const& toolName);
+			::std::optional<Tool*> Get(::std::string const& toolName, bool fetch = true);
 			// Fetches every tool in this repo (updates if not present) and get them on a vector.
 			::std::vector<Tool> const GetAll();
 
@@ -143,7 +148,7 @@ namespace uft::Tools
 			// Helper to know if any tool is present in this repository efficiently.
 			bool HasTools() const;
 
-			~ToolHandler();
+			~ToolHandler() = default;
 	};
 }
 #endif

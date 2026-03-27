@@ -1,4 +1,8 @@
+#ifndef UFT_RECOVERY
+#define _UFT_RECOVERY
+
 #include "../tools.h"
+#include "../flash.h"
 
 namespace uft::Tools
 {
@@ -11,5 +15,10 @@ namespace uft::Tools
 		static Recovery OrangeFox(::std::string const& _deviceCodeName);
 		// Look for a compatible TWRP version for the given device. Will be supported in the future
 		// static Recovery const TWRP(::std::string const& _deviceCodeName, ::std::string const& version="");
+		
+		// Flashes this Recovery image into a connected device.
+		bool Flash() const;
 	};
 }
+
+#endif

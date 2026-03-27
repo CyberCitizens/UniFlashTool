@@ -4,3 +4,6 @@
 [submodule "libs/libxmlpp"]
 	path = libs/libxmlpp
 	url = https://github.com/libxmlplusplus/libxmlplusplus
+[submodule "libs/libxml2"]
+	path = libs/libxml2
+	url = https://github.com/GNOME/libxml2

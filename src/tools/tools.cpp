@@ -100,7 +100,7 @@ namespace uft::Tools
 		data["tools"] = nlohmann::json::array();
 		::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);
 		data["repo_path"] = LocalRepoPath;
-		for(const Tool& tool : LocalTools)
+		for(Tool const& tool : LocalTools)
 		{
 			nlohmann::json tool_data;
 			tool_data["name"] = tool.Name;
@@ -187,23 +187,23 @@ namespace uft::Tools
 		return url.substr(pos + 1);
 	}
 	
-	bool ToolHandler::Download(Tool& tool, ::std::string const& source)
+	bool ToolHandler::Download(Tool* tool, ::std::string const& source)
 	{
 		size_t expected_content_length = -1;
 		::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);
 		::std::string const
-			path = LocalRepoPath + "/" + tool.Name,
+			path = LocalRepoPath + "/" + (tool->TargetDevice ? *tool->TargetDevice + "/" : "") + tool->Name,
 			temp = path + "/tempArchive.blob";
 		slrm.unlock();
 		if(!::std::filesystem::exists(path))
-			::std::filesystem::create_directory(path);
+			::std::filesystem::create_directories(path);
 		::std::ofstream archive(temp);
 		if(!archive.is_open())
 			return false;
 		curlpp::Easy handle;
 		handle.setOpt(curlpp::options::Timeout(0));
 		handle.setOpt(curlpp::options::FollowLocation(true));
-		handle.setOpt(curlpp::options::Url(*tool.Source));
+		handle.setOpt(curlpp::options::Url(*tool->Source));
 		handle.setOpt(curlpp::options::NoSignal(true));
 		handle.setOpt(curlpp::options::WriteFunction(
 			[&archive](void* buffer, size_t size, size_t count) -> size_t
@@ -236,7 +236,7 @@ namespace uft::Tools
 				}
 				// Look for Content-Disposition: attachment; filename="Magisk-v28.0.zip"
 				// If tool.ArchiveName is already set, don't bother to rewrite it. Keep the right value.
-				if (!tool.ArchiveName && header.find("Content-Disposition") != std::string::npos) {
+				if (!tool->ArchiveName && header.find("Content-Disposition") != std::string::npos) {
 					size_t pos = header.find("filename=");
 					if (pos != std::string::npos)
 					{
@@ -245,7 +245,7 @@ namespace uft::Tools
 						if (quote == '"' || quote == '\'') {
 							pos++;  // Skip quote
 							size_t end = header.find(quote, pos);
-							tool.ArchiveName = header.substr(pos, end - pos);
+							tool->ArchiveName = header.substr(pos, end - pos);
 							return size * count;
 						}
 					}
@@ -255,7 +255,7 @@ namespace uft::Tools
 			}
 		));
 		handle.perform();
-		if(!tool.ArchiveName)
+		if(!tool->ArchiveName)
 		{
 			// Still not any name found ? Let's try to extract one from the URL !
 			char* effUrl = nullptr;
@@ -263,31 +263,34 @@ namespace uft::Tools
 			if (res == CURLE_OK && effUrl != nullptr)
 			{
 				std::string url(effUrl, strlen(effUrl));
-				qDebug() << url;
 				::std::string const fileNameFromUrl = GetFileNameFromUrl(url);
 				if(!fileNameFromUrl.empty())
 				{
-					tool.ArchiveName = fileNameFromUrl;
-					qDebug() << *tool.ArchiveName;
+					tool->ArchiveName = fileNameFromUrl;
+					::std::filesystem::rename(temp, path + "/" + *tool->ArchiveName);
+					Save();
 					return true;
 				}
 			}
 			return false;
 		}
-		::std::filesystem::rename(temp, path + "/" + *tool.ArchiveName);
+		::std::filesystem::rename(temp, path + "/" + *tool->ArchiveName);
+		Save();
 		return true;
 	}
 
 
 	// Returns the path to given tool, and if not present, downloads it prior to returning its local path.
-	::std::string ToolHandler::Get(Tool& tool, bool forceDownload)
+	::std::string ToolHandler::Get(Tool tool, bool forceDownload)
 	{
+		Tool* toolPtr = 0;
 		::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);
-		::std::string toolPath = LocalRepoPath + "/" + tool.Name;
+		::std::string toolPath = LocalRepoPath + "/" + (tool.TargetDevice ? *tool.TargetDevice + "/" : "") + tool.Name;
 		bool loaded = false;
-		for(Tool const& _t : LocalTools)
+		for(Tool& _t : LocalTools)
 			if(_t.Name == tool.Name)
 			{
+				toolPtr = &_t;
 				loaded = true;
 				break;
 			}
@@ -300,22 +303,23 @@ namespace uft::Tools
 			{
 				::std::lock_guard<::std::shared_mutex> ulrm(RepoMutex);
 				LocalTools.push_back(tool);
+				toolPtr = &LocalTools.back();
 			}
 			Save();
 		}
 		
 		// The Tool has already been downloaded, return that path
-		if(tool.ArchiveName && ::std::filesystem::exists(toolPath + "/" + *tool.ArchiveName) && !forceDownload)
-			return toolPath + "/" + *tool.ArchiveName;
+		if(toolPtr->ArchiveName && ::std::filesystem::exists(toolPath + "/" + *toolPtr->ArchiveName) && !forceDownload)
+			return toolPath + "/" + *toolPtr->ArchiveName;
 		else
 		{
-			if(Download(tool, *tool.Source))
-				return LocalRepoPath + "/" + *tool.ArchiveName;
+			if(Download(toolPtr, *tool.Source))
+				return LocalRepoPath + "/" + *toolPtr->ArchiveName;
 		}
 		return ::uft::st("An error occurred while trying to retrieve a referenced tool.");
 	}
 
-	::std::optional<Tool> ToolHandler::Get(::std::string const& toolName)
+	::std::optional<Tool*> ToolHandler::Get(::std::string const& toolName, bool fetch)
 	{
 		::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);
 		for(Tool& tool : LocalTools)
@@ -323,8 +327,9 @@ namespace uft::Tools
 			{
 				slrm.unlock(); // Get will have to reserve lock_guard's, so I have to stop reading here.
 				// Fetches it and downloads it prior using it.
-				Get(tool);
-				return tool;
+				if(fetch)
+					Get(tool);
+				return &tool;
 			}
 		// No corresponding tool has been found.
 		return ::std::nullopt;

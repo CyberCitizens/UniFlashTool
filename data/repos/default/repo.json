@@ -1,12 +1,29 @@
 {
 	"repo_path": "data/repos/default",
-	"timestamp": 1773990181,
+	"timestamp": 1774602215,
 	"tools": [
 		{
-			"archive_name": "lineage-23.2-20260319-nightly-sweet-signed.zip",
-			"name": "LineageOS",
-			"source": "https://mirrorbits.lineageos.org/full/sweet/20260319/lineage-23.2-20260319-nightly-sweet-signed.zip",
+			"archive_name": "dtbo.img",
+			"name": "LineageOS's DTBO for sweet",
+			"source": "https://mirrorbits.lineageos.org/full/sweet/20260326/dtbo.img",
+			"source_type": 3,
+			"target_device": "sweet",
+			"type": 0
+		},
+		{
+			"archive_name": "boot.img",
+			"name": "LineageOS's boot for sweet",
+			"source": "https://mirrorbits.lineageos.org/full/sweet/20260326/boot.img",
+			"source_type": 3,
+			"target_device": "sweet",
+			"type": 1
+		},
+		{
+			"archive_name": "lineage-23.2-20260326-nightly-sweet-signed.zip",
+			"name": "LineageOS for sweet",
+			"source": "https://mirrorbits.lineageos.org/full/sweet/20260326/lineage-23.2-20260326-nightly-sweet-signed.zip",
 			"source_type": 1,
+			"target_device": "sweet",
 			"type": 3
 		}
 	]

@@ -1,6 +1,4 @@
 #include "flash.h"
-#include <iostream>
-
 
 namespace uft::Tools::Flash
 {
@@ -18,7 +16,7 @@ namespace uft::Tools::Flash
 	::std::string const RebootToBootloader()
 	{
 		if(!HasDevice())
-			return ::std::string(UFT_ERROR_TAG) + "An error occurred while retrieving devices. Are you connected to your phone ?";
+			return ::std::string(UFT_ERROR_TAG) + ::uft::st("An error occurred while retrieving devices. Are you connected to your phone ?");
 		return Platform::RunCommand("adb", { "reboot", "bootloader", });
 	}
 
@@ -33,6 +31,19 @@ namespace uft::Tools::Flash
 		return STATE_UNKNOWN;
 	}
 
+	::std::string const Sideload(::std::string const& filePath)
+	{
+		if(!HasDevice())
+			return ::uft::st("No device connected. Please provide a connected Android device before trying to sideload any file and / or archive.") + UFT_ERROR_TAG;
+		if(::std::filesystem::exists(filePath) && !::std::filesystem::is_directory(filePath))
+			if(GetConnectedDeviceState() == STATE_SIDELOAD)
+				return Platform::RunCommand("adb", { "sideload", filePath.c_str() });
+			else
+				return ::uft::st("Currently connected device is not ready to sideload. Did you enable ADB bridge yet ?") + UFT_ERROR_TAG;
+		return ::uft::st("Provided resource is either a directory or not an archive file.") + UFT_ERROR_TAG;
+	}
+
+
 	bool FastBoot::HasDevice()
 	{
 		::std::string const device = Platform::RunCommand("fastboot", { "devices" });
@@ -43,8 +54,9 @@ namespace uft::Tools::Flash
 	{
 		// prevents flashing on a corrupt or hacky system
 		if(!HasDevice())
-			return ::uft::t<::std::string>("An error happened while detecting connected devices in fastboot mode. ");
-
+			return ::uft::t<::std::string>("An error happened while detecting connected devices in fastboot mode. ") + UFT_ERROR_TAG;
+		if(GetConnectedDeviceState() != FASTBOOT)
+			return ::uft::st("Device is not ready to perform any flash. Please put the device in Fastboot mode.") + UFT_ERROR_TAG;
 		::std::string const output = Platform::RunCommand("fastboot", {
 			"flash",
 			QString::fromStdString(PARTITIONS.at(partition)),

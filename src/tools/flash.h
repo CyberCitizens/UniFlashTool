@@ -67,6 +67,8 @@ namespace uft::Tools::Flash
 	::std::string const RebootToBootloader();
 	// Ensures ADB is running, starts a new server if no server is connected, and returns the result output.
 	::std::string const EnsureADB();
+	// Loads a .zip into a phone.
+	::std::string const Sideload(::std::string const& filePath);
 	namespace FastBoot
 	{
 		// Returns true if a device is connected with fastboot, false if not.
