@@ -46,8 +46,10 @@ private:
 	// Saves the current configuration for this tool
 	QPushButton	*saveTool			= new QPushButton(::uft::qt("Save configuration for this tool"));
 
-	::uft::Tools::ToolHandler* currentRepo = ::uft::Tools::ToolHandler::GetDefault(); // repo that's currently edited
-
+	QPushButton *removeTool			= new QPushButton(::uft::qt("Remove tool from Repository and Disk"));
+	
+	::uft::Tools::ToolHandler* 	currentRepo = ::uft::Tools::ToolHandler::GetDefault(); // repo that's currently edited
+	::uft::Tools::Tool*			currentTool = 0;
 //private slots:
 	// Adds a new local repository
 	void AddLocalRepo();
@@ -60,7 +62,7 @@ private:
 	// Refreshes the repository list
 	void RefreshRepoList();
 	// Refreshes the view to access a tool's values.
-	void RefreshToolView(::uft::Tools::Tool const& tool);
+	void RefreshToolView();
 	
 	// Makes a tool from the informations the user has input.
 	::uft::Tools::Tool MakeToolFromInput() const;

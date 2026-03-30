@@ -68,13 +68,13 @@ namespace uft::Tools::Flash
 	// Ensures ADB is running, starts a new server if no server is connected, and returns the result output.
 	::std::string const EnsureADB();
 	// Loads a .zip into a phone.
-	::std::string const Sideload(::std::string const& filePath);
+	::std::string const Sideload(::std::string const& filePath, QTextEdit* log = 0);
 	namespace FastBoot
 	{
 		// Returns true if a device is connected with fastboot, false if not.
 		bool HasDevice();
 		// Flashes a file into a given partition, if a device is connected
-		::std::string const Flash(PARTITION const partition, ::std::string const& filename);
+		::std::string const Flash(PARTITION const partition, ::std::string const& filename, QTextEdit* log = 0);
 		// Reboots into a known partition
 		// (leave empty for standard reboot)
 		::std::string const Reboot(PARTITION const partition = SYSTEM);

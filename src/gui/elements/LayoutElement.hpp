@@ -6,6 +6,7 @@
 #include <qwidget.h>
 #include <qlayout.h>
 #include <qlabel.h>
+#include <qlistwidget.h>
 
 class LayoutElement : public QHBoxLayout
 {

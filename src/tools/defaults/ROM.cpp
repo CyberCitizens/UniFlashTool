@@ -14,7 +14,16 @@ namespace uft::Tools
 		Bootloader = _Boot;
 		
 		for(Tool tool : ::std::initializer_list<Tool>{ DTBO, Bootloader, ROM })
+		{
+			if(_TargetDevice.empty() && tool.TargetDevice)
+				_TargetDevice = *tool.TargetDevice;
+			if(!_TargetDevice.empty() && tool.TargetDevice && _TargetDevice != * tool.TargetDevice)
+			{
+				::std::cerr << "Incompatible tool to queue in ReadOnlyMemory. Ignoring tool: " << tool.Name << ::std::endl;
+				continue;
+			}
 			Origin->AddTool(tool);
+		}
 	}
 
 	ReadOnlyMemory const ReadOnlyMemory::Lineage(::std::string const& device)
@@ -56,8 +65,34 @@ namespace uft::Tools
 		);
 	}
 
+	ReadOnlyMemory* ReadOnlyMemory::set(Tool tool)
+	{
+		switch (tool.Type)
+		{
+			case TOOL_TYPE::BOOT:
+				Bootloader = tool;
+				return this;
+			case TOOL_TYPE::DTBO:
+				DTBO = tool;
+				return this;
+			case TOOL_TYPE::ROM:
+				ROM = tool;
+				return this;
+			case TOOL_TYPE::INTEGRITY:
+				PlayIntegrityFix = tool;
+				return this;
+			case TOOL_TYPE::ROOT:
+				Root = tool;
+				return this;
+			default:
+				return this;
+		}
+		// Recovery tools should not be treated here.
+	}
+
+
 	using namespace ::uft::Tools::Flash::FastBoot;
-	bool ReadOnlyMemory::Flash() const
+	bool ReadOnlyMemory::Flash(QTextEdit *log) const
 	{
 		auto getPath = [this](Tool const& tool) -> ::std::optional<::std::string const>
 		{
@@ -80,13 +115,17 @@ namespace uft::Tools
 				switch(tool.Type)
 				{
 					case TOOL_TYPE::BOOT:
-						commandOutput = Flash::FastBoot::Flash(Flash::PARTITION::BOOT, *toolPath);
+						commandOutput = Flash::FastBoot::Flash(Flash::PARTITION::BOOT, *toolPath, log);
 						break;
 					case TOOL_TYPE::DTBO:
-						commandOutput = Flash::FastBoot::Flash(Flash::PARTITION::DTBO, *toolPath);
+						commandOutput = Flash::FastBoot::Flash(Flash::PARTITION::DTBO, *toolPath, log);
 						break;
+					case TOOL_TYPE::RECOVERY:
+						break;
+					default: // modules like Magisk and PIF are sideloaded, not flashed.
 					case TOOL_TYPE::ROM:
-						commandOutput = Flash::Sideload(*toolPath);
+						commandOutput = Flash::Sideload(*toolPath, log);
+						break;
 				}
 			if(!Platform::CheckForCommandExecution(commandOutput))
 				QMessageBox::warning(0, ::uft::qt("Error while loading data to device"),

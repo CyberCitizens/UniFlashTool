@@ -35,9 +35,11 @@ qt_add_executable(uniflashtool
 	src/gui/elements/LabeledWidget.hpp
 	src/gui/elements/LayoutElement.cpp
 	src/gui/elements/LayoutElement.hpp
+	src/gui/elements/ToolWidget.cpp
 	src/gui/dialogs/RepoDialog.cpp
 	src/gui/dialogs/GitHubTool.cpp
 	src/gui/dialogs/GitHubTool.hpp
+	src/gui/dialogs/Flash.cpp
 	src/platform/deps.cpp
 	src/tools/tools.cpp
 	src/tools/flash.cpp

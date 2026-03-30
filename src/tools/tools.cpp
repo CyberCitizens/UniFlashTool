@@ -1,13 +1,25 @@
 #include "tools.h"
 #include "curlpp/Options.hpp"
 #include <qdebug.h>
+#include <stdexcept>
 
 namespace uft::Tools::GitHub
 {
-	const ::std::string MakeUrlFromInfo(
+	const ::std::optional<::std::string> MakeUrlFromInfo(
 			::std::string const& Author,
 			::std::string const& Repo,
 			::std::string const& ArtifactRegex,
+			::std::string const& Tag
+		)
+	{
+		::std::string _discard;
+		return MakeUrlFromInfo(Author, Repo, ArtifactRegex, _discard, Tag);
+	}
+	const ::std::optional<::std::string> MakeUrlFromInfo(
+			::std::string const& Author,
+			::std::string const& Repo,
+			::std::string const& ArtifactRegex,
+			::std::string& ArchiveName,
 			::std::string const& Tag
 		)
 	{
@@ -15,13 +27,21 @@ namespace uft::Tools::GitHub
 			repo,
 			releases,
 			release;
-		::std::regex reg(ArtifactRegex);
 		::std::string const
 			repoURL = base + "/" + Author + "/" + Repo;
-		repo = ::nlohmann::json::parse(Tools::HttpGet(repoURL));
-		::std::string
-			releasesURL = Tools::HttpGet(repo["releases_url"]);
-		releases = ::nlohmann::json::parse(Tools::HttpGet(releasesURL));
+		try
+		{
+			::std::string page = Tools::HttpGet(repoURL);
+			repo = ::nlohmann::json::parse(page);
+			::std::string
+				releasesURL = repo["releases_url"];
+			releasesURL = releasesURL.substr(0, releasesURL.find('{'));
+			page = Tools::HttpGet(releasesURL);
+			releases = ::nlohmann::json::parse(page);
+		} catch(::nlohmann::detail::parse_error error)
+		{
+			return ::std::nullopt;
+		}
 		// If a tag is given, look for it in the releases
 		if(!Tag.empty())
 		{
@@ -36,12 +56,19 @@ namespace uft::Tools::GitHub
 		// If not, just take the latest one (for real) (based decision)
 		else
 			release = releases[0];
+		::std::regex reg(ArtifactRegex);
 		for(auto const& asset : release["assets"])
+		{
+			::std::string const assetName = asset["name"].get<::std::string>();
 			// if file name matches what the artifact regex told us to get, it's the right URL.
-			if(::std::regex_search(asset["name"].get<::std::string>(), reg))
+			if(::std::regex_search(assetName, reg))
+			{
+				ArchiveName = asset["name"];
 				return asset["browser_download_url"];
+			}
+		}
 		// no relevant file has been found in given repository.
-		return "";
+		return ::std::nullopt;
 	}
 }
 
@@ -165,6 +192,7 @@ namespace uft::Tools
 	{
 		::std::stringstream ss;
 		curlpp::Easy handle;
+		handle.setOpt(curlpp::options::UserAgent("Samsung Fridge OS X"));
 		handle.setOpt(curlpp::options::FollowLocation(true));
 		handle.setOpt(curlpp::options::Url(url));
 		handle.setOpt(curlpp::options::NoSignal(true));
@@ -191,6 +219,8 @@ namespace uft::Tools
 	{
 		size_t expected_content_length = -1;
 		::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);
+		if(!tool->Source)
+			tool->Source = source;
 		::std::string const
 			path = LocalRepoPath + "/" + (tool->TargetDevice ? *tool->TargetDevice + "/" : "") + tool->Name,
 			temp = path + "/tempArchive.blob";
@@ -291,6 +321,8 @@ namespace uft::Tools
 			if(_t.Name == tool.Name)
 			{
 				toolPtr = &_t;
+				// Copy new values in old place (just in case changes has been made)
+				*toolPtr = tool;
 				loaded = true;
 				break;
 			}
@@ -311,7 +343,7 @@ namespace uft::Tools
 		// The Tool has already been downloaded, return that path
 		if(toolPtr->ArchiveName && ::std::filesystem::exists(toolPath + "/" + *toolPtr->ArchiveName) && !forceDownload)
 			return toolPath + "/" + *toolPtr->ArchiveName;
-		else
+		else if(tool.Source)
 		{
 			if(Download(toolPtr, *tool.Source))
 				return LocalRepoPath + "/" + *toolPtr->ArchiveName;
@@ -362,4 +394,46 @@ namespace uft::Tools
 			return LocalTools;
 		}
 	}
+
+	bool ToolHandler::Remove(Tool tool)
+	{
+		return Remove(tool.Name);
+	}
+
+	bool ToolHandler::Remove(::std::string const& toolName)
+	{
+		Tool *tool = 0;
+		size_t where = 0;
+		{
+			::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);
+			for(auto& _t : LocalTools)
+			{
+				if(_t.Name == toolName)
+				{
+					tool = &_t;
+					break;
+				}
+				++where;
+			}
+			if(!tool)
+				return true; // Tool doesn't exist anyway, so why bother returning a "It didn't work !!!" Message...
+		}
+		
+		try
+		{
+			::std::string path =
+				LocalRepoPath + (tool->TargetDevice ? "/" + *tool->TargetDevice + "/" : "/") + tool->Name;
+			if(::std::filesystem::exists(path + "/" + *tool->ArchiveName))
+				::std::filesystem::remove(path + "/" + *tool->ArchiveName);
+			if(::std::filesystem::exists(path))
+				::std::filesystem::remove(path);
+			LocalTools.erase(LocalTools.begin() + where); // we erase it
+		} catch(::std::range_error error) {
+			::std::cerr << error.what() << ::std::endl;
+			return false;
+		}
+		return true;
+	}
+
+
 }

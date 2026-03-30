@@ -47,6 +47,27 @@ namespace uft::Platform
 		return output.contains(predicateString.c_str(), Qt::CaseInsensitive);
 	}
 
+	::std::string RunCommand(const std::string& cmd, QStringList const& args, int timeout, QTextEdit* log)
+	{
+		QProcess process;
+		process.setProcessChannelMode(QProcess::MergedChannels);
+		process.start(QString::fromStdString(cmd), args);
+
+		while (process.state() != QProcess::NotRunning || process.canReadLine()) {
+			if (process.waitForReadyRead(100)) {
+				QByteArray data = process.readAllStandardOutput();
+				if (log) {
+					log->append(QString::fromUtf8(data).trimmed());
+					qApp->processEvents(); 
+				}
+			}
+			
+		}
+
+		process.waitForFinished(timeout);
+		return process.readAllStandardOutput().toStdString();
+	}
+
 	::std::string RunCommand(const std::string& cmd, QStringList const& args, int timeout)
 	{
 		QProcess process;

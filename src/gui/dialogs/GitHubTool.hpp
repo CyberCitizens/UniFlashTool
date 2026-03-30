@@ -5,7 +5,11 @@
 
 #include <qdialog.h>
 #include <qlabel.h>
-#include <QTextBlock>
+#include <qtextedit.h>
+#include <qpushbutton.h>
+#include <qcombobox.h>
+#include <qmessagebox.h>
+#include <qlineedit.h>
 #include "../elements/LabeledWidget.hpp"
 
 class GitHubTool : public QDialog

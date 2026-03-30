@@ -7,6 +7,7 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 	resize(500, 400);
 	QPushButton *addRepo		= new QPushButton(uft::qt("Add local repository"));
 	QPushButton *addTool		= new QPushButton(uft::qt("Add tool to current repository"));
+	QPushButton *getRecommendedForMyDevice = new QPushButton(::uft::qt("Get recommended tools for my device"));
 
 	QPushButton	*addGithubTool	= new QPushButton(::uft::qt("Add a tool from GitHub"));
 
@@ -31,6 +32,7 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 	for(auto const& widget : ::std::initializer_list<QLayout*>{
 		(new LabeledWidget(::uft::t<::std::string>("Tool to edit"), toolList))
 			->setSpacer(LabeledWidget::RIGHT),
+		(new LayoutElement(getRecommendedForMyDevice))->setSpacer(LayoutElement::RIGHT),
 		(new LayoutElement(addGithubTool))->setSpacer(LayoutElement::RIGHT),
 		(new LayoutElement(addTool))->setSpacer(LayoutElement::RIGHT),
 		(new LayoutElement(addRepo))->setSpacer(LayoutElement::RIGHT)
@@ -59,6 +61,7 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 			->setSpacer(LabeledWidget::RIGHT),
 		(new LabeledWidget(::uft::t<::std::string>("Save tool configuration"), saveTool))
 			->setSpacer(LabeledWidget::RIGHT),
+		(new LayoutElement(removeTool))->setSpacer(LayoutElement::RIGHT),
 	})
 		repoSettings->addLayout(widget);
 	
@@ -73,7 +76,8 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 		currentRepo = Repos.at(index);
 		RefreshRepoList();
 		if(currentRepo->HasTools())
-			RefreshToolView(currentRepo->GetAll().at(0));
+			currentTool = (::uft::Tools::Tool*)&currentRepo->GetAll().at(0);
+		RefreshToolView();
 	});
 
 	connect(toolList, &QComboBox::currentIndexChanged, this, [this](int index)
@@ -81,9 +85,10 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 		if(!currentRepo)
 			return;
 		auto toolsInRepo = currentRepo->GetAll();
-		if(!currentRepo->HasTools())
+		if(!currentRepo->HasTools() || toolsInRepo.size() < index + 1)
 			return;
-		RefreshToolView(toolsInRepo.at(index));
+		currentTool = (::uft::Tools::Tool*)&toolsInRepo.at(index);
+		RefreshToolView();
 	});
 
 	connect(addTool, &QPushButton::clicked, this, [this](){ AddTool(currentRepo); });
@@ -102,6 +107,45 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 		);
 		download.join();
 		currentRepo->Save();
+	});
+	connect(getRecommendedForMyDevice, &QPushButton::clicked, this, [this] -> void
+	{
+		if(!::uft::Tools::Flash::FastBoot::HasDevice())
+		{
+			QMessageBox::warning(this, ::uft::qt("Getting recommended tools"),
+				::uft::qt("No device is currently connected. Please connect an Android device with USB debugging enabled to perform this action.")
+			);
+			return;
+		}
+		auto response = QMessageBox::information(this,
+			::uft::qt("Getting recommanded tools"),
+			::uft::qt("This will download the latest version of LineageOS and of OrangeFox Recovery for your device. Do you agree ?\nThis procedure can freeze UniFlashTool for several minutes depending on your network strength."),
+			QMessageBox::StandardButton::Ok,
+			QMessageBox::StandardButton::Cancel
+		);
+		if(response == QMessageBox::StandardButton::Cancel)
+		{
+			QMessageBox::information(this, ::uft::qt("About recommanded tools"),
+				::uft::qt("The operation were aborted. No tool were downloaded.")
+			);
+			return;
+		}
+		::std::string const codename = uft::Tools::Flash::GetConnectedDeviceCodename();
+		// Actual download
+		::std::thread
+			ofox([this, codename]
+			{
+				uft::Tools::ToolHandler::GetDefault()
+					->AddTool(uft::Tools::Recovery::OrangeFox(codename));
+			}),
+			lineage([this, codename]
+			{
+				// auto stores in default repo
+				auto rom = uft::Tools::ReadOnlyMemory::Lineage(codename);
+			});
+		
+		ofox.join();
+		lineage.join();
 	});
 
 	RefreshRepoList();
@@ -134,19 +178,31 @@ void RepoDialog::RefreshRepoList()
 	downloadAlert.close();
 	for(::uft::Tools::Tool const& tool : tools)
 		toolList->addItem(QString::fromStdString(tool.Name));
-	RefreshToolView(tools.at(0));
+	currentTool = &tools.at(0);
+	RefreshToolView();
 }
 
-void RepoDialog::RefreshToolView(::uft::Tools::Tool const& tool)
+void RepoDialog::RefreshToolView()
 {
-	toolName->setText(QString::fromStdString(tool.Name));
-	toolType->setCurrentIndex(tool.Type);
-	if(tool.TargetDevice)
-		toolDeviceString->setText(QString::fromStdString(*tool.TargetDevice));
-	if(tool.Source)
-		toolUrl->setText(QString::fromStdString(*tool.Source));
-	if(tool.SourceType)
-		toolSourceType->setCurrentIndex(*tool.SourceType);
+	if(!currentTool)
+		return;
+	toolName->setText(QString::fromStdString(currentTool->Name));
+	toolType->setCurrentIndex(currentTool->Type);
+	if(currentTool->TargetDevice)
+		toolDeviceString->setText(QString::fromStdString(*currentTool->TargetDevice));
+	if(currentTool->Source)
+		toolUrl->setText(QString::fromStdString(*currentTool->Source));
+	if(currentTool->SourceType)
+		toolSourceType->setCurrentIndex(*currentTool->SourceType);
+	disconnect(removeTool, &QPushButton::clicked, 0, 0);
+	connect(removeTool, &QPushButton::clicked, this, [this] -> void
+	{
+		currentRepo->Remove(*currentTool);
+		currentRepo->Save();
+		RefreshRepoList();
+		AddTool(currentRepo);
+	});
+
 }
 
 ::uft::Tools::Tool RepoDialog::MakeToolFromInput() const
@@ -199,8 +255,8 @@ void RepoDialog::AddTool(uft::Tools::ToolHandler* const repo)
 		.TargetDevice 	= ::uft::Tools::Flash::GetConnectedDeviceCodename(),
 		.Source 		= "https://example.org/source/.git",
 	};
-	
-	RefreshToolView(newTool);
+	currentTool = &newTool; // temporary value is used only for display purposes
+	RefreshToolView();
 }
 
 void RepoDialog::SeeRepo(uft::Tools::ToolHandler* const repo)

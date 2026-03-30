@@ -14,6 +14,7 @@
 #include <qtmetamacros.h>
 
 #include "dialogs/RepoDialog.hpp"
+#include "dialogs/Flash.hpp"
 #include "../tools/flash.h"
 #include "../tools/defaults/ROM.hpp"
 

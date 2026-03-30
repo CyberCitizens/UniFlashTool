@@ -31,13 +31,16 @@ namespace uft::Tools::Flash
 		return STATE_UNKNOWN;
 	}
 
-	::std::string const Sideload(::std::string const& filePath)
+	::std::string const Sideload(::std::string const& filePath, QTextEdit* log)
 	{
 		if(!HasDevice())
 			return ::uft::st("No device connected. Please provide a connected Android device before trying to sideload any file and / or archive.") + UFT_ERROR_TAG;
 		if(::std::filesystem::exists(filePath) && !::std::filesystem::is_directory(filePath))
 			if(GetConnectedDeviceState() == STATE_SIDELOAD)
-				return Platform::RunCommand("adb", { "sideload", filePath.c_str() });
+				if(log)
+					return Platform::RunCommand("adb", { "sideload", filePath.c_str() }, -1, log);
+				else
+					return Platform::RunCommand("adb", { "sideload", filePath.c_str() });
 			else
 				return ::uft::st("Currently connected device is not ready to sideload. Did you enable ADB bridge yet ?") + UFT_ERROR_TAG;
 		return ::uft::st("Provided resource is either a directory or not an archive file.") + UFT_ERROR_TAG;
@@ -50,19 +53,26 @@ namespace uft::Tools::Flash
 		return Platform::CheckForCommandExecution(device) && !device.empty();
 	}
 
-	::std::string const FastBoot::Flash(PARTITION const partition, ::std::string const& filename)
+	::std::string const FastBoot::Flash(PARTITION const partition, ::std::string const& filename, QTextEdit* log)
 	{
 		// prevents flashing on a corrupt or hacky system
 		if(!HasDevice())
 			return ::uft::t<::std::string>("An error happened while detecting connected devices in fastboot mode. ") + UFT_ERROR_TAG;
 		if(GetConnectedDeviceState() != FASTBOOT)
 			return ::uft::st("Device is not ready to perform any flash. Please put the device in Fastboot mode.") + UFT_ERROR_TAG;
-		::std::string const output = Platform::RunCommand("fastboot", {
-			"flash",
-			QString::fromStdString(PARTITIONS.at(partition)),
-			QString::fromStdString(filename)
-		});
-
+		::std::string output;
+		if(!log)
+			Platform::RunCommand("fastboot", {
+				"flash",
+				QString::fromStdString(PARTITIONS.at(partition)),
+				QString::fromStdString(filename)
+			});
+		else
+			Platform::RunCommand("fastboot", {
+				"flash",
+				QString::fromStdString(PARTITIONS.at(partition)),
+				QString::fromStdString(filename)
+			}, -1, log);
 		return output;
 	}
 

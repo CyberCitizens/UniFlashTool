@@ -64,7 +64,7 @@ void UniFlash::setupUI()
 {
 		
 	QPushButton *setupBtn 	= new QPushButton(uft::qt("Setup ADB/Fastboot"));
-	QPushButton *flashBtn 	= new QPushButton(uft::qt("Flash Everything"));
+	QPushButton *flashBtn 	= new QPushButton(uft::qt("Open Flashing procedure"));
 	QPushButton *addTool 	= new QPushButton(uft::qt("Manage tools and repositories"));
 
 	QPushButton *changeLang	= new QPushButton(uft::qt("Change Language"));
@@ -93,8 +93,9 @@ void UniFlash::setupUI()
 	setLayout(layout);
 	resize(800, 600);
 
-	connect(setupBtn, 	&QPushButton::clicked, this, &UniFlash::SetupAndroidTools);
-	connect(addTool, 	&QPushButton::clicked, this, &UniFlash::AddToolToRepo);
+	connect(setupBtn, 	&QPushButton::clicked,	this,	&UniFlash::SetupAndroidTools);
+	connect(addTool, 	&QPushButton::clicked,	this,	&UniFlash::AddToolToRepo);
+	connect(flashBtn,	&QPushButton::clicked,	this,	[this]{ FlashDialog fd(this); fd.exec();});
 
 	// QMessageBox::information(this, "", QString::fromStdString(uft::Tools::Flash::GetConnectedDeviceCodename()));
 }

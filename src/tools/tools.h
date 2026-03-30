@@ -25,7 +25,15 @@ namespace uft::Tools
 
 		// Returns an URL containing a path to specified (or latest, if none given) release,
 		// or source code archive if no release is provided.
-		const ::std::string MakeUrlFromInfo(
+		const ::std::optional<::std::string> MakeUrlFromInfo(
+			::std::string const& Author,		// GitHub Repo author
+			::std::string const& Repo,			// Repository name
+			::std::string const& ArtifactRegex,	// Regex to know if the found asset is valid and will be set up for download
+			::std::string& ArchiveNamePtr,		// Where to write the final Archive Name
+			::std::string const& Tag = ""		// Tag to look for in releases (if present)
+		);
+		
+		const ::std::optional<::std::string> MakeUrlFromInfo(
 			::std::string const& Author,		// GitHub Repo author
 			::std::string const& Repo,			// Repository name
 			::std::string const& ArtifactRegex,	// Regex to know if the found asset is valid and will be set up for download
@@ -100,6 +108,16 @@ namespace uft::Tools
 				size += sizeof(char) * Version->size();
 			return size;
 		}
+		::std::optional<::std::string> const GetFileName() const
+		{
+			if(!ArchiveName)
+				return ::std::nullopt;
+			return (
+				TargetDevice ?
+					*TargetDevice + "/"
+					: ""
+			) + *ArchiveName;
+		}
 	} Tool;
 
 	class ToolHandler
@@ -136,6 +154,9 @@ namespace uft::Tools
 			::std::string Get(Tool tool, bool forceDownload = false);
 			// Simply adds a tool and tries to download it in repository.
 			void AddTool(Tool tool);
+			// Removes a tool from the repository and from the disk.
+			bool Remove(Tool tool);
+			bool Remove(::std::string const& toolName);
 			// Finds the associated tool with toolName, and returns it, if present.
 			// Also downloads it if it's present but not downloaded.
 			::std::optional<Tool*> Get(::std::string const& toolName, bool fetch = true);
@@ -147,6 +168,15 @@ namespace uft::Tools
 
 			// Helper to know if any tool is present in this repository efficiently.
 			bool HasTools() const;
+
+			// Gets the path to a tool that's been downloaded already.
+			::std::optional<::std::string> GetToolPath(Tool tool) const
+			{
+				auto _tpath = tool.GetFileName();
+				if(!_tpath)
+					return ::std::nullopt;
+				return LocalRepoPath + "/" + *_tpath;
+			}
 
 			~ToolHandler() = default;
 	};

@@ -11,6 +11,8 @@ namespace uft::Tools
 		// Repo origin for the tools we handle from here.
 		ToolHandler * const Origin = 0;
 
+		::std::string _TargetDevice = "";
+
 		Tool ROM;
 		Tool DTBO;
 		Tool Bootloader;
@@ -28,8 +30,12 @@ namespace uft::Tools
 
 		static ReadOnlyMemory const Lineage(::std::string const& device);
 
+		// Sets or add (if not already present) this tool as a holder of this tool's role (tool type).
+		ReadOnlyMemory* set(Tool tool);
+
 		// Flashes this instance on the currently connected device
-		bool Flash() const;
+		bool Flash(QTextEdit *log = 0) const;
+		::std::string const GetTargetDevice() const { return _TargetDevice; };
 	};
 }
 #endif

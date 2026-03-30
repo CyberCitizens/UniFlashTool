@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QMessageBox>
 #include <QClipboard>
+#include <QTextEdit>
 
 #include <curlpp/Easy.hpp>
 #include <curlpp/cURLpp.hpp>
@@ -71,6 +72,7 @@ namespace uft::Platform
 	bool EnsureTool(::std::string command, ::std::string predicateString);
 	// Runs a command and returns the output.
 	::std::string RunCommand(const std::string& cmd, QStringList const& args = {}, int timeout = -1);
+	::std::string RunCommand(const std::string& cmd, QStringList const& args, int timeout, QTextEdit* log);
 	// Installs ADB, Fastboot and other needed tools to communicate with Android devices.
 	bool InstallAndroidTools();
 	// Returns true if no error has been found in output.

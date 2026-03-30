@@ -3,6 +3,12 @@
 namespace uft::Tools
 {
 	::std::map<::std::string const, Recovery> Recovery::CachedRecoveryImages{};
+
+	Recovery::Recovery(Tool source) : Tool{source}
+	{
+		Type = RECOVERY;
+	}
+	
 	Recovery Recovery::OrangeFox(::std::string const& _deviceCodeName)
 	{
 		Recovery OrangeFox;
@@ -23,5 +29,13 @@ namespace uft::Tools
 		
 		CachedRecoveryImages.emplace(_deviceCodeName, OrangeFox);
 		return OrangeFox;
+	}
+
+	bool Recovery::Flash(QTextEdit* log) const
+	{
+		if(!ArchiveName || !TargetDevice)
+			return false;
+		Tools::Flash::FastBoot::Reboot(Flash::PARTITION::FASTBOOT);
+		Tools::Flash::FastBoot::Flash(Flash::PARTITION::RECOVERY, *Origin->GetToolPath(*this));
 	}
 }

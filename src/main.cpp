@@ -4,7 +4,7 @@ using namespace uft;
 
 void testConfig()
 {
-	// return;
+	return;
 	try
 	{
 		::std::string const testDevice = "sweet";
