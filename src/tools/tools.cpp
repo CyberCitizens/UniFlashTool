@@ -195,7 +195,7 @@ namespace uft::Tools
 		handle.setOpt(curlpp::options::UserAgent("Samsung Fridge OS X"));
 		handle.setOpt(curlpp::options::FollowLocation(true));
 		handle.setOpt(curlpp::options::Url(url));
-		handle.setOpt(curlpp::options::NoSignal(true));
+		// handle.setOpt(curlpp::options::NoSignal(true));
 		handle.setOpt(curlpp::options::WriteFunction(
 			[&ss](void* buffer, size_t size, size_t count) -> size_t
 			{

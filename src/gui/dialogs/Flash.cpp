@@ -123,7 +123,7 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 				));
 				return;
 			}
-						auto rom = getToolByType(TOOL_TYPE::ROM);
+			auto rom = getToolByType(TOOL_TYPE::ROM);
 			auto dtbo = getToolByType(TOOL_TYPE::DTBO);
 			auto boot = getToolByType(TOOL_TYPE::BOOT);
 			auto recovery = getToolByType(TOOL_TYPE::RECOVERY);

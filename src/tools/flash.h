@@ -58,7 +58,7 @@ namespace uft::Tools::Flash
 		{ STATE_UNKNOWN,		"unknown"		},
 	};
 
-	
+	bool HasDevice(); // ADB check to know if there is a device connected.
 	// Gets the name of the currently connected device
 	::std::string const GetConnectedDeviceCodename();
 	// Gets the state of the currently connected device.

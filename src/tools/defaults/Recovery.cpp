@@ -23,7 +23,7 @@ namespace uft::Tools
 
 		OrangeFox.TargetDevice = _deviceCodeName;
 		OrangeFox.SourceType = SOURCE_TYPE::ARCHIVE;
-		OrangeFox.Source = device["mirrors"]["AR"]; // It will be the Source URL for future downloads of this precise image
+		OrangeFox.Source = device["mirrors"].front(); // It will be the Source URL for future downloads of this precise image
 		OrangeFox.Type = TOOL_TYPE::RECOVERY;
 		OrangeFox.Name = "OrangeFox for " + _deviceCodeName;
 		

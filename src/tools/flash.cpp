@@ -5,12 +5,13 @@ namespace uft::Tools::Flash
 	::std::string const GetConnectedDeviceCodename()
 	{
 		::std::string const device = Platform::RunCommand("adb", { "shell", "getprop", "ro.product.device" });
-		return device;
+		return device.substr(0, device.size() - 1);
 	}
 	
-	inline bool HasDevice()
+	bool HasDevice()
 	{
-		return Platform::CheckForCommandExecution(Platform::RunCommand("adb", { "devices" }));
+		::std::string const exec = Platform::RunCommand("adb", { "devices" });
+		return Platform::CheckForCommandExecution(exec) && exec != "List of devices attached\n";
 	}
 	
 	::std::string const RebootToBootloader()

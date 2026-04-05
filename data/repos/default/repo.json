@@ -1,6 +1,6 @@
 {
 	"repo_path": "data/repos/default",
-	"timestamp": 1774835627,
+	"timestamp": 1775410840,
 	"tools": [
 		{
 			"archive_name": "dtbo.img",
@@ -24,6 +24,38 @@
 			"source": "https://mirrorbits.lineageos.org/full/sweet/20260326/lineage-23.2-20260326-nightly-sweet-signed.zip",
 			"source_type": 1,
 			"target_device": "sweet",
+			"type": 3
+		},
+		{
+			"archive_name": "dtbo.img",
+			"name": "LineageOS's DTBO for Pong",
+			"source": "https://mirrorbits.lineageos.org/full/Pong/20260401/dtbo.img",
+			"source_type": 3,
+			"target_device": "Pong",
+			"type": 0
+		},
+		{
+			"archive_name": "694ad61ff46547dde371233a",
+			"name": "OrangeFox for Pong",
+			"source": "https://dl.orangefox.download/694ad61ff46547dde371233a",
+			"source_type": 1,
+			"target_device": "Pong",
+			"type": 2
+		},
+		{
+			"archive_name": "boot.img",
+			"name": "LineageOS's boot for Pong",
+			"source": "https://mirrorbits.lineageos.org/full/Pong/20260401/boot.img",
+			"source_type": 3,
+			"target_device": "Pong",
+			"type": 1
+		},
+		{
+			"archive_name": "lineage-23.2-20260401-nightly-Pong-signed.zip",
+			"name": "LineageOS for Pong",
+			"source": "https://mirrorbits.lineageos.org/full/Pong/20260401/lineage-23.2-20260401-nightly-Pong-signed.zip",
+			"source_type": 1,
+			"target_device": "Pong",
 			"type": 3
 		}
 	]

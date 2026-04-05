@@ -110,7 +110,7 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 	});
 	connect(getRecommendedForMyDevice, &QPushButton::clicked, this, [this] -> void
 	{
-		if(!::uft::Tools::Flash::FastBoot::HasDevice())
+		if(!::uft::Tools::Flash::HasDevice())
 		{
 			QMessageBox::warning(this, ::uft::qt("Getting recommended tools"),
 				::uft::qt("No device is currently connected. Please connect an Android device with USB debugging enabled to perform this action.")
