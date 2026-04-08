@@ -33,8 +33,20 @@ namespace uft::Tools
 		// Sets or add (if not already present) this tool as a holder of this tool's role (tool type).
 		ReadOnlyMemory* set(Tool tool);
 
-		// Flashes this instance on the currently connected device
+		void SetRoot(Tool root)
+		{
+			Root = root;
+		}
+
+		void SetPlayIntegrityFix(Tool pif)
+		{
+			PlayIntegrityFix = pif;
+		}
+
+		// Flashes this instance's hardward components on the currently connected device.
 		bool Flash(QTextEdit *log = 0) const;
+		bool LoadROM(QTextEdit *log = 0) const; // Sideloads the ROM's contents on the connected device.
+		bool LoadTools(QTextEdit *log = 0) const; // Sideloads the user chosen tools onto the device.
 		::std::string const GetTargetDevice() const { return _TargetDevice; };
 	};
 }

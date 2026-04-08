@@ -8,7 +8,7 @@ add_compile_options(-pipe -Wno-unknown-argument)
 set(CMAKE_CXX_FLAGS_DEBUG "-march=native -O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-march=native -O3 -pipe")
 
-find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Gui)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Gui Concurrent)
 set(LIBXML2_ROOT "${CMAKE_BINARY_DIR}/_deps/libxml2")
 
 set(LIBXML2_SOURCE_DIR "${CMAKE_SOURCE_DIR}/libs/libxml2")
@@ -24,7 +24,15 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(libxml2)
 
-# add_subdirectory("${LIBXML2_ROOT}")
+find_package(LibXml2 REQUIRED)
+find_package(LibArchive REQUIRED)
+
+if(TARGET LibArchive::LibArchive)
+    set(LIBARCHIVE_TARGET LibArchive::LibArchive)
+else()
+    set(LIBARCHIVE_TARGET ${LibArchive_LIBRARIES})
+    include_directories(${LibArchive_INCLUDE_DIRS})
+endif()
 
 qt_standard_project_setup()
 qt_add_executable(uniflashtool
@@ -49,9 +57,10 @@ qt_add_executable(uniflashtool
 )
 add_subdirectory(libs/curlpp)
 
-find_package(LibXml2 REQUIRED)
 
-target_include_directories(uniflashtool PRIVATE "${LIBXML2_INCLUDE_DIR}")
+target_include_directories(uniflashtool PRIVATE
+	"${LIBXML2_INCLUDE_DIR}"
+)
 
 target_compile_options(uniflashtool PRIVATE -w)
 
@@ -62,4 +71,6 @@ target_link_libraries(uniflashtool PRIVATE
     Qt6::Widgets 
     Qt6::Network
 	Qt6::Gui
+	Qt6::Concurrent
+	"${LIBARCHIVE_TARGET}"
 )

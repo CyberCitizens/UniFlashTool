@@ -13,7 +13,7 @@ class ToolWidget : public QWidget
 		
 		QLabel* name = new QLabel(QString::fromStdString(_Tool.Name));
 		QLabel* type = new QLabel(QString::fromStdString(TOOL_TYPES.at(_Tool.Type)));
-		QLabel* targetDevice = new QLabel(QString::fromStdString(*_Tool.TargetDevice));
+		QLabel* targetDevice = new QLabel(QString::fromStdString(_Tool.TargetDevice ? *_Tool.TargetDevice : "Generic"));
 	public:
 		ToolWidget(Tool const& tool, QWidget* parent = 0);
 		ToolWidget* refresh();

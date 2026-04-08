@@ -13,7 +13,7 @@ namespace uft::Tools
 	{
 	protected:
 		ToolHandler *Origin = ToolHandler::GetDefault();
-		static ::std::map<::std::string const, Recovery> CachedRecoveryImages;
+		// static ::std::map<::std::string const, Recovery> CachedRecoveryImages;
 	public:
 		Recovery() : Tool{} {}
 		Recovery(Tool source);
@@ -22,6 +22,7 @@ namespace uft::Tools
 		// Look for a compatible TWRP version for the given device. Will be supported in the future
 		// static Recovery const TWRP(::std::string const& _deviceCodeName, ::std::string const& version="");
 		
+		::std::optional<::std::string> GetImageFromArchive() const; // Extracts content from an archive, looking for an .img file.
 		// Flashes this Recovery image into a connected device.
 		bool Flash(QTextEdit* log) const;
 	};

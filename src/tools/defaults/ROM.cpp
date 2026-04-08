@@ -92,24 +92,30 @@ namespace uft::Tools
 
 
 	using namespace ::uft::Tools::Flash::FastBoot;
+
+	bool ReadOnlyMemory::LoadROM(QTextEdit* log) const
+	{
+		auto toolPath = Origin->GetToolPath(ROM);
+		if(!toolPath)
+		{
+			if(log)
+				log->append(::uft::qt("Cannot find a path to the ROM. Aborting.\n"));
+			return false;
+		}
+		::std::string const commandOutput = Flash::Sideload(*toolPath, log);
+		return Platform::CheckForCommandExecution(commandOutput);
+	}
+	
 	bool ReadOnlyMemory::Flash(QTextEdit *log) const
 	{
-		auto getPath = [this](Tool const& tool) -> ::std::optional<::std::string const>
-		{
-			::std::string const devicePrefix =
-				(tool.TargetDevice ? *tool.TargetDevice + "/" : "");
-			if(!tool.ArchiveName)
-				return ::std::nullopt;
-			return Origin->GetPath() + "/" + devicePrefix + *tool.ArchiveName;
-		};
 		bool success = true;
 		for(auto const& tool : {
 			DTBO,
 			Bootloader,
-			ROM
+			// ROM // Flash hardward stuff first
 		})
 		{
-			auto toolPath = getPath(tool);
+			auto toolPath = Origin->GetToolPath(tool);
 			::std::string commandOutput;
 			if(toolPath)
 				switch(tool.Type)
@@ -124,8 +130,9 @@ namespace uft::Tools
 						break;
 					default: // modules like Magisk and PIF are sideloaded, not flashed.
 					case TOOL_TYPE::ROM:
-						commandOutput = Flash::Sideload(*toolPath, log);
 						break;
+						/* commandOutput = Flash::Sideload(*toolPath, log);
+						break; */
 				}
 			if(!Platform::CheckForCommandExecution(commandOutput))
 				QMessageBox::warning(0, ::uft::qt("Error while loading data to device"),
@@ -139,4 +146,28 @@ namespace uft::Tools
 		);
 		return success;
 	}
+
+	bool ReadOnlyMemory::LoadTools(QTextEdit *log) const
+	{
+		bool success = true;
+		for(auto const& tool : {
+			Root,
+			PlayIntegrityFix,
+		})
+		{
+			if(!tool)
+				continue;
+			::std::optional<::std::string> toolPath = Origin->GetToolPath(*tool);
+			if(!toolPath)
+				continue;
+			// log->append(::uft::qt("Please enable ADB Sideload bridge again..."));
+			Flash::WaitForSideload();
+			if(!Platform::CheckForCommandExecution(
+				Flash::Sideload(*toolPath, log)
+			))
+				success = false;
+		}
+		return success;
+	}
+
 }

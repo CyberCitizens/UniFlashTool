@@ -13,6 +13,8 @@
 #include <QTextBlock>
 #include <qlineedit.h>
 #include <QToolBar>
+#include <QThread>
+#include <QCheckBox>
 
 #include "../elements/ToolWidget.hpp"
 #include "../elements/LabeledWidget.hpp"

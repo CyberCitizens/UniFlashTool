@@ -116,7 +116,7 @@ namespace uft::Tools
 				TargetDevice ?
 					*TargetDevice + "/"
 					: ""
-			) + *ArchiveName;
+			) + Name + "/" + *ArchiveName;
 		}
 	} Tool;
 

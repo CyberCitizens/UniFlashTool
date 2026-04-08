@@ -7,6 +7,8 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 	QVBoxLayout * toolset = new QVBoxLayout;
 	QVBoxLayout * config = new QVBoxLayout;
 	QTextEdit *log = new QTextEdit;
+
+	log->setReadOnly(true);
 	frame->addLayout(toolset);
 	frame->addLayout(config);
 	
@@ -17,6 +19,7 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 
 	QPushButton * addToolToConfig = new QPushButton(::uft::qt("Add tool to config"));
 	QPushButton * flash = new QPushButton(::uft::qt("Flash config"));
+	QCheckBox * formatWipeData = new QCheckBox;
 
 	for(QLayout* element : ::std::initializer_list<QLayout*>{
 		new LabeledWidget(::uft::st("Repository: "), repoList),
@@ -30,6 +33,7 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 
 	for(QLayout* element : ::std::initializer_list<QLayout*>{
 		new LabeledWidget(::uft::st("Current configuration:"), 0),
+		new LabeledWidget(::uft::st("Wipe data before flashing (DO BACKUPS FIRST, ALL DATA WILL BE LOST !)"), formatWipeData),
 		new LayoutElement(configToolset),
 		new LayoutElement(removeToolFromConfig),
 		new LayoutElement(flash),
@@ -46,21 +50,40 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 
 	auto refreshToolList = [ repoList, toolList ]()
 	{
+		::std::string const codename = ::uft::Tools::Flash::GetConnectedDeviceCodename();
 		auto repos = ::uft::Tools::ToolHandler::GetAllRepos();
+		bool specificDevice = false;
+		if(::uft::Platform::CheckForCommandExecution(codename))
+			// A device with a valid codename has been detected, show only compatible tools with this device
+			// (This avoid a lot of bricking scenarii)
+			specificDevice = true;
 		::std::string const currentRepoPath = repoList->currentText().toStdString();
 		::uft::Tools::ToolHandler* repo = ::uft::Tools::ToolHandler::GetOrCreateRepo(currentRepoPath);
 		toolList->clear();
 		for(auto tool : repo->GetAll())
+			if(
+				(specificDevice && tool.TargetDevice && *tool.TargetDevice == codename) // This tool is target-specific, and we got a valid and corresponding target device connected,or the tool is platform-independant
+				|| !specificDevice // or we don't have any target device connected (we vibe)
+				|| !tool.TargetDevice // or we don't even have a target device for this tool (we vibe even harder)
+			)
 			toolList->addItem(QString::fromStdString(tool.Name));
 	};
 
-	auto getToolFromSelected = [ repoList, toolList ] -> Tool
+	auto getToolFromSelected = [ repoList, toolList ] -> Tool*
 	{
-		return **::uft::Tools::ToolHandler::GetOrCreateRepo(
-				repoList->currentText().toStdString()
-			)->Get(
-				toolList->currentText().toStdString()
-			);
+		::uft::Tools::ToolHandler* repo = ::uft::Tools::ToolHandler::GetOrCreateRepo(
+			repoList->currentText().toStdString()
+		);
+		if(!repo)
+			return {};
+		
+		::std::optional<Tool*> toolPtr = repo->Get(
+			toolList->currentText().toStdString()
+		);
+
+		if(!toolPtr || !*toolPtr)
+			return {};
+		return *toolPtr;
 	};
 
 	auto getToolByType = [ configToolset ](TOOL_TYPE type) -> ::std::optional<Tool>
@@ -77,7 +100,8 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 
 	connect(repoList, &QComboBox::currentIndexChanged, refreshToolList);
 	connect(addToolToConfig, &QPushButton::clicked, this, [this, repoList, toolList, configToolset, getToolFromSelected]{
-		ToolWidget* tw = new ToolWidget(getToolFromSelected());
+		Tool _tool = *getToolFromSelected();
+		ToolWidget* tw = new ToolWidget(_tool);
 		for(int i = 0; i < configToolset->count(); ++i)
 		{
 			QListWidgetItem* item = configToolset->item(i);
@@ -91,7 +115,7 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 					.arg(QString::fromStdString(tw->GetTool().Name)
 					.arg(QString::fromStdString(currentTool.Name)))
 				);
-				break;
+				return;
 			}
 		}
 		//check finished, add tool to current config
@@ -114,7 +138,7 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 		}
 	});
 	connect(flash, &QPushButton::clicked, this,
-		[this, log, getToolByType, configToolset] -> void
+		[this, log, getToolByType, configToolset, formatWipeData] -> void
 		{
 			if(!Flash::FastBoot::HasDevice())
 			{
@@ -151,15 +175,41 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 				QMessageBox::information(this, ::uft::qt("Flash info"), ::uft::qt("Operation aborted."));
 				return;
 			}
-			::uft::Tools::Config _Config{
-				ReadOnlyMemory{
-					*rom,
-					*dtbo,
-					*boot
-				},
-				Recovery{*recovery}
+			
+			auto root = getToolByType(TOOL_TYPE::ROOT);
+			auto pif = getToolByType(TOOL_TYPE::INTEGRITY);
+
+			ReadOnlyMemory system{
+				*rom,
+				*dtbo,
+				*boot
 			};
-			_Config.Flash(log);
+
+			if(root)
+				system.SetRoot(*root);
+			if(pif)
+				system.SetPlayIntegrityFix(*pif);
+			
+			auto* _Config = new ::uft::Tools::Config {
+				system,
+				Recovery{*recovery},
+				formatWipeData->isChecked(),
+			};
+			QThread* worker = new QThread;
+			_Config->moveToThread(worker);
+
+			connect(worker, &QThread::started, [log, _Config]()
+			{
+				_Config->Flash(log);
+			});
+			connect(_Config, &Config::requestUserAction, this, [this](QString title, QString message) {
+				QMessageBox::information(this, title, message);
+			});
+			connect(_Config, &Config::statusUpdated, log, &QTextEdit::append);
+			connect(worker, &QThread::finished, worker, &QThread::deleteLater);
+			connect(worker, &QThread::finished, _Config, &QThread::deleteLater);
+			
+			worker->start();
 		});
 	refreshRepoList();
 }

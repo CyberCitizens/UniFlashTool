@@ -14,6 +14,9 @@
 #include <QClipboard>
 #include <QTextEdit>
 
+#include <archive.h>
+#include <archive_entry.h>
+
 #include <curlpp/Easy.hpp>
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Options.hpp>

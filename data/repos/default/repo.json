@@ -1,62 +1,54 @@
 {
 	"repo_path": "data/repos/default",
-	"timestamp": 1775410840,
+	"timestamp": 1775623124,
 	"tools": [
 		{
 			"archive_name": "dtbo.img",
 			"name": "LineageOS's DTBO for sweet",
-			"source": "https://mirrorbits.lineageos.org/full/sweet/20260326/dtbo.img",
+			"source": "https://mirrorbits.lineageos.org/full/sweet/20260402/dtbo.img",
 			"source_type": 3,
 			"target_device": "sweet",
 			"type": 0
 		},
 		{
-			"archive_name": "boot.img",
-			"name": "LineageOS's boot for sweet",
-			"source": "https://mirrorbits.lineageos.org/full/sweet/20260326/boot.img",
-			"source_type": 3,
-			"target_device": "sweet",
-			"type": 1
-		},
-		{
-			"archive_name": "lineage-23.2-20260326-nightly-sweet-signed.zip",
-			"name": "LineageOS for sweet",
-			"source": "https://mirrorbits.lineageos.org/full/sweet/20260326/lineage-23.2-20260326-nightly-sweet-signed.zip",
+			"archive_name": "61e927c7eff912e9c632873c.zip",
+			"name": "OrangeFox for sweet",
+			"source": "https://dl.orangefox.download/61e927c7eff912e9c632873c",
 			"source_type": 1,
 			"target_device": "sweet",
-			"type": 3
-		},
-		{
-			"archive_name": "dtbo.img",
-			"name": "LineageOS's DTBO for Pong",
-			"source": "https://mirrorbits.lineageos.org/full/Pong/20260401/dtbo.img",
-			"source_type": 3,
-			"target_device": "Pong",
-			"type": 0
-		},
-		{
-			"archive_name": "694ad61ff46547dde371233a",
-			"name": "OrangeFox for Pong",
-			"source": "https://dl.orangefox.download/694ad61ff46547dde371233a",
-			"source_type": 1,
-			"target_device": "Pong",
 			"type": 2
 		},
 		{
 			"archive_name": "boot.img",
-			"name": "LineageOS's boot for Pong",
-			"source": "https://mirrorbits.lineageos.org/full/Pong/20260401/boot.img",
+			"name": "LineageOS's boot for sweet",
+			"source": "https://mirrorbits.lineageos.org/full/sweet/20260402/boot.img",
 			"source_type": 3,
-			"target_device": "Pong",
+			"target_device": "sweet",
 			"type": 1
 		},
 		{
-			"archive_name": "lineage-23.2-20260401-nightly-Pong-signed.zip",
-			"name": "LineageOS for Pong",
-			"source": "https://mirrorbits.lineageos.org/full/Pong/20260401/lineage-23.2-20260401-nightly-Pong-signed.zip",
+			"archive_name": "lineage-23.2-20260402-nightly-sweet-signed.zip",
+			"name": "LineageOS for sweet",
+			"source": "https://mirrorbits.lineageos.org/full/sweet/20260402/lineage-23.2-20260402-nightly-sweet-signed.zip",
 			"source_type": 1,
-			"target_device": "Pong",
+			"target_device": "sweet",
 			"type": 3
+		},
+		{
+			"archive_name": "Magisk.zip",
+			"name": "Magisk",
+			"source": "https://github.com/topjohnwu/Magisk/releases/download/v30.7/Magisk-v30.7.apk",
+			"source_type": 0,
+			"type": 4,
+			"version": ""
+		},
+		{
+			"archive_name": "PlayIntegrityFix_v4.5-inject-s.zip",
+			"name": "PlayIntegrityFix",
+			"source": "https://github.com/KOWX712/PlayIntegrityFix/releases/download/v4.5-inject-s/PlayIntegrityFix_v4.5-inject-s.zip",
+			"source_type": 0,
+			"type": 5,
+			"version": ""
 		}
 	]
 }

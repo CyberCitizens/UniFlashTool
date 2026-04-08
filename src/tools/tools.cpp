@@ -104,7 +104,7 @@ namespace uft::Tools
 	ToolHandler::ToolHandler(::std::string const& localRepo)
 	{
 		if(!::std::filesystem::exists(localRepo))
-			::std::filesystem::create_directory(localRepo);
+			::std::filesystem::create_directories(localRepo);
 		LocalRepoPath = localRepo;
 		::std::lock_guard<::std::shared_mutex> ulrm(RepoMutex);
 		Repos.emplace(LocalRepoPath, this); // add this repo to the list of all instanciated repos
@@ -285,6 +285,13 @@ namespace uft::Tools
 			}
 		));
 		handle.perform();
+		auto addExtension = [](::std::string const& fileName, ::std::string const& extension) -> ::std::string
+		{
+			if(fileName.substr(fileName.size() - extension.size()) == extension)
+				return fileName; // extension already present
+			return fileName + extension;
+		};
+
 		if(!tool->ArchiveName)
 		{
 			// Still not any name found ? Let's try to extract one from the URL !
@@ -293,11 +300,28 @@ namespace uft::Tools
 			if (res == CURLE_OK && effUrl != nullptr)
 			{
 				std::string url(effUrl, strlen(effUrl));
-				::std::string const fileNameFromUrl = GetFileNameFromUrl(url);
+				::std::string extension;
+				switch(tool->Type)
+				{
+					case TOOL_TYPE::DTBO:
+					case TOOL_TYPE::BOOT:
+						extension = ".img";
+						break;
+					default:
+						extension = ".zip";
+				}
+				::std::string const fileNameFromUrl = addExtension(GetFileNameFromUrl(url), extension);
 				if(!fileNameFromUrl.empty())
 				{
-					tool->ArchiveName = fileNameFromUrl;
-					::std::filesystem::rename(temp, path + "/" + *tool->ArchiveName);
+					try
+					{
+						tool->ArchiveName = fileNameFromUrl;
+						::std::filesystem::rename(temp, path + "/" + *tool->ArchiveName);
+					} catch(...)
+					{
+						tool->ArchiveName = addExtension(tool->Name, extension);
+						::std::filesystem::rename(temp, path + "/" + *tool->ArchiveName);
+					}
 					Save();
 					return true;
 				}

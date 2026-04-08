@@ -49,23 +49,35 @@ namespace uft::Platform
 
 	::std::string RunCommand(const std::string& cmd, QStringList const& args, int timeout, QTextEdit* log)
 	{
-		QProcess process;
-		process.setProcessChannelMode(QProcess::MergedChannels);
-		process.start(QString::fromStdString(cmd), args);
-
-		while (process.state() != QProcess::NotRunning || process.canReadLine()) {
-			if (process.waitForReadyRead(100)) {
-				QByteArray data = process.readAllStandardOutput();
-				if (log) {
-					log->append(QString::fromUtf8(data).trimmed());
-					qApp->processEvents(); 
-				}
+		QProcess* process = new ::QProcess;
+		::QProcess::connect(process, &QProcess::readyReadStandardOutput, [process, log]() -> void
+		{
+			if(log && process)
+			{
+				log->append(process->readAllStandardOutput());
+				log->moveCursor(QTextCursor::End);
 			}
-			
+		});
+		::QProcess::connect(process, &QProcess::readyReadStandardOutput, [process, log]() -> void
+		{
+			if(log && process)
+			{
+				log->append(process->readAllStandardOutput());
+				log->moveCursor(QTextCursor::End);
+			}
+		});
+		::QProcess::connect(process, &QProcess::finished, process, &QObject::deleteLater);
+		process->setProcessChannelMode(QProcess::MergedChannels);
+		process->start(QString::fromStdString(cmd), args);
+		try
+		{
+			process->waitForFinished(timeout);
+		} catch(...) {
+			::std::string const errors = process->readAllStandardError().trimmed().toStdString();
+			::std::string const output = process->readAllStandardOutput().trimmed().toStdString();
+			return output + "\n" + UFT_ERROR_TAG + "Errors:\n" + errors;
 		}
-
-		process.waitForFinished(timeout);
-		return process.readAllStandardOutput().toStdString();
+		return process->readAllStandardOutput().toStdString();
 	}
 
 	::std::string RunCommand(const std::string& cmd, QStringList const& args, int timeout)
@@ -73,7 +85,14 @@ namespace uft::Platform
 		QProcess process;
 		
 		process.start(cmd.c_str(), args);
-		process.waitForFinished(timeout);
+		try
+		{
+			process.waitForFinished(timeout);
+		} catch(...) {
+			/* ::std::string const errors = process.readAllStandardError().trimmed().toStdString();
+			::std::string const output = process.readAllStandardOutput().trimmed().toStdString(); */
+			return ::std::string(UFT_ERROR_TAG) + " ERROR "; //output + "\n" +  + "Errors:\n" + errors;
+		}
 		::std::string const errors = process.readAllStandardError().trimmed().toStdString();
 		::std::string const output = process.readAllStandardOutput().trimmed().toStdString();
 		int const exitCode = process.exitCode();

@@ -46,6 +46,7 @@ namespace uft::Tools::Flash
 		STATE_DEVICE,			// The device is being used normally, booted in the system.
 		STATE_RECOVERY,			// The system is in recovery mode.
 		STATE_SIDELOAD,			// The system is accepting sideload traffic.
+		STATE_FASTBOOT,			// The device is in Fastboot / Fastbootd mode.
 		STATE_UNKNOWN,			// The system is connected, but its state cannot be mapped to a known state.
 	};
 
@@ -58,21 +59,30 @@ namespace uft::Tools::Flash
 		{ STATE_UNKNOWN,		"unknown"		},
 	};
 
+	void WaitForState(DEVICE_STATE state); // Blocks this thread (without burning the CPU) until the device reaches a certain state.
+
 	bool HasDevice(); // ADB check to know if there is a device connected.
 	// Gets the name of the currently connected device
 	::std::string const GetConnectedDeviceCodename();
 	// Gets the state of the currently connected device.
 	DEVICE_STATE const GetConnectedDeviceState();
+	// Blocking operation waiting for ADB to have an open connection to talk with an adbd instance on a remote device for a Sideload operation.
+	void WaitForSideload();
+	// Simply performs a reboot, rebooting to normal system.
+	::std::string const Reboot();
 	// Reboots a device to its bootloader, enabling fastboot commands.
-	::std::string const RebootToBootloader();
+	::std::string const RebootToFastBoot();
 	// Ensures ADB is running, starts a new server if no server is connected, and returns the result output.
 	::std::string const EnsureADB();
 	// Loads a .zip into a phone.
 	::std::string const Sideload(::std::string const& filePath, QTextEdit* log = 0);
 	namespace FastBoot
 	{
+		void WaitForFastBoot(); // Waits until the device is in fastboot mode.
 		// Returns true if a device is connected with fastboot, false if not.
 		bool HasDevice();
+		// Wipe data on every partition of this device.
+		::std::string const Format(QTextEdit* log = 0);
 		// Flashes a file into a given partition, if a device is connected
 		::std::string const Flash(PARTITION const partition, ::std::string const& filename, QTextEdit* log = 0);
 		// Reboots into a known partition
