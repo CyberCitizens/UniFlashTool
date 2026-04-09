@@ -119,8 +119,8 @@ jobs:
           name: binary-${{ matrix.os }}
           path: |
             UniFlashTool-Windows.zip
-            uniflashtool-*.AppImage
-            UniFlashTool-MacOS.dmg
+            *.AppImage
+            *.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   publish:
