@@ -10,9 +10,6 @@
 #include <regex>
 #include <format>
 #include <map>
-#include <libxml/HTMLparser.h>
-#include <libxml/HTMLtree.h>
-#include <libxml/xpath.h>
 #include "../gui/Translate.hpp"
 
 namespace uft::Tools
