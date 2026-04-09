@@ -4,7 +4,7 @@ on:
   push:
     tags:
       - 'v*'
-
+  workflow_dispatch:
 # Fully vibe-coded, I know nothing about GitHub actions fam 🥀
 
 jobs:
