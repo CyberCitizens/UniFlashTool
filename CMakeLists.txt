@@ -56,6 +56,10 @@ qt_add_executable(uniflashtool
 	src/tools/defaults/Recovery.cpp
 	src/tools/Config.cpp
 )
+set_target_properties(uniflashtool PROPERTIES
+    MACOSX_BUNDLE TRUE
+    MACOSX_BUNDLE_BUNDLE_NAME "uniflashtool"
+)
 add_subdirectory(libs/curlpp)
 
 

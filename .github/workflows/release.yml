@@ -68,7 +68,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           macdeployqt build/uniflashtool.app -dmg
-          mv build/uniflashtool.dmg uniflashtool-MacOS.dmg
+          mv build/uniflashtool.dmg UniFlashTool-MacOS.dmg
 
       - name: Package Windows (Zip)
         if: runner.os == 'Windows'
@@ -85,9 +85,11 @@ jobs:
           wget -c https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage
           chmod +x linuxdeployqt-continuous-x86_64.AppImage
           mkdir -p dist/usr/bin
+          mkdir -p dist/usr/share/applications/
+          mkdir -p dist/usr/share/icons/hicolor/256x256/apps/
           cp build/uniflashtool dist/usr/bin/
-          cp uniflashtool.desktop dist/usr/share/applications/
-          cp uniflashtool.png dist/usr/share/icons/hicolor/256x256/apps/
+          cp uniflashtool.desktop dist/
+          cp uniflashtool.png dist/
           export VERSION=${{ github.ref_name }}
           ./linuxdeployqt-continuous-x86_64.AppImage dist/usr/bin/uniflashtool -appimage -always-overwrite -unsupported-allow-new-glibc
 
