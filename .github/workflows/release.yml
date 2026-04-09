@@ -82,16 +82,19 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          if (Test-Path "build/Release/translations") { Remove-Item -Recurse -Force "build/Release/translations" }
+          New-Item -ItemType Directory -Force -Path "deploy/bin"
+          
+          Copy-Item "build/Release/uniflashtool.exe" "deploy/bin/"
+          
           $env:VCINSTALLDIR = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC"
-          cd build/Release
+          cd deploy/bin
           & "D:\a\UniFlashTool\UniFlashTool\Qt\Qt\6.5.0\msvc2019_64\bin\windeployqt.exe" `
-            --qmldir ../.. `
-            --plugindir ./plugins `
+            --qmldir ../../ `
             --no-compiler-runtime `
             uniflashtool.exe
+          
           cd ../..
-          Compress-Archive -Path build/Release/* -DestinationPath UniFlashTool-Windows.zip
+          Compress-Archive -Path deploy/bin/* -DestinationPath UniFlashTool-Windows.zip
 
       - name: Package Linux (Tarball)
         if: runner.os == 'Linux'
