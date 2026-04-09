@@ -83,14 +83,16 @@ jobs:
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path "deploy/bin"
-          
           Copy-Item "build/Release/uniflashtool.exe" "deploy/bin/"
           
           $env:VCINSTALLDIR = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC"
           cd deploy/bin
+          
           & "D:\a\UniFlashTool\UniFlashTool\Qt\Qt\6.5.0\msvc2019_64\bin\windeployqt.exe" `
             --qmldir ../../ `
+            --no-translations `
             --no-compiler-runtime `
+            --no-opengl-sw `
             uniflashtool.exe
           
           cd ../..
