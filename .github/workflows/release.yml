@@ -29,8 +29,8 @@ jobs:
         with:
           version: '6.5.0'
           dir: ${{ github.workspace }}/Qt
-          cached: false
-          host: ${{ matrix.os == 'windows-latest' && 'windows' || 'linux' }}
+          cache: false
+          host: ${{ matrix.os == 'windows-latest' && 'windows' || (matrix.os == 'macos-latest' && 'mac' || 'linux') }}
           target: 'desktop'
 
       # MacOS only action:
@@ -48,7 +48,7 @@ jobs:
         shell: bash
         run: |
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-          cmake --build . --config Release
+          cmake --build build --config Release
 
       - name: Package macOS
         if: runner.os == 'macOS'
