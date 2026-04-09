@@ -135,7 +135,7 @@ namespace uft::Tools
 				}
 			if(!Platform::CheckForCommandExecution(commandOutput))
 				QMessageBox::warning(0, ::uft::qt("Error while loading data to device"),
-				::uft::qt("The following error happened while trying to load data to your device: <pre>%1</pre>").arg(commandOutput)
+				::uft::qt("The following error happened while trying to load data to your device: <pre>%1</pre>").arg(QString::fromStdString(commandOutput))
 			);
 		}
 		if(success)
