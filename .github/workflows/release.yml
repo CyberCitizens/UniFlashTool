@@ -36,31 +36,47 @@ jobs:
       # MacOS only action:
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
-        run: brew install curlpp curl libarchive
+        run: |
+          brew install curlpp curl libarchive
+          echo "LibArchive_ROOT=$(brew --prefix libarchive)" >> $GITHUB_ENV
 
       - name: Install Dependencies (Linux)
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libarchive-dev libcurl4-openssl-dev libfuse2
+      
+      - name: Install Dependencies (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          vcpkg install libarchive:x64-windows curl:x64-windows
 
       - name: Build UniFlashTool
         shell: bash
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          CMAKE_FLAGS=""
+          if [ "${{ runner.os }}" == "Windows" ]; then
+            CMAKE_FLAGS="-DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake"
+          elif [ "${{ runner.os }}" == "macOS" ]; then
+            CMAKE_FLAGS="-DLibArchive_ROOT=$(brew --prefix libarchive)"
+          fi
+          
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release $CMAKE_FLAGS
           cmake --build build --config Release
 
       - name: Package macOS
         if: runner.os == 'macOS'
         run: |
-          macdeployqt build/UniFlashTool.app -dmg
-          mv build/UniFlashTool.dmg UniFlashTool-MacOS.dmg
+          macdeployqt build/uniflashtool.app -dmg
+          mv build/uniflashtool.dmg uniflashtool-MacOS.dmg
 
       - name: Package Windows (Zip)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          windeployqt build/Release/UniFlashTool.exe
+          cd build/Release
+          windeployqt --qmldir ../.. uniflashtool.exe
+          cd ../..
           Compress-Archive -Path build/Release/* -DestinationPath UniFlashTool-Windows.zip
 
       - name: Package Linux (Tarball)
