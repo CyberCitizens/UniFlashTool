@@ -67,22 +67,30 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 	
 	setLayout(layout);
 
-	connect(repoList, &QComboBox::currentIndexChanged, this, [this](int index)
+	auto updateToolsAndRepos = [this](int repoIndex) -> void
 	{
 		if(!currentRepo)
 			return;
-		if(Repos.size() < 1 || index < 1)
+		if(Repos.size() < 1 || repoIndex < 0)
 			return;
-		currentRepo = Repos.at(index);
+		currentRepo = Repos.at(repoIndex);
 		RefreshRepoList();
 		if(currentRepo->HasTools())
 			currentTool = (::uft::Tools::Tool*)&currentRepo->GetAll().at(0);
 		RefreshToolView();
+	};
+
+	connect(repoList, &QComboBox::currentIndexChanged, this, [this, updateToolsAndRepos](int index)
+	{
+		if(index > 0)
+			updateToolsAndRepos(index);
 	});
 
 	connect(toolList, &QComboBox::currentIndexChanged, this, [this](int index)
 	{
 		if(!currentRepo)
+			return;
+		if(index < 0)
 			return;
 		auto toolsInRepo = currentRepo->GetAll();
 		if(!currentRepo->HasTools() || toolsInRepo.size() < index + 1)
@@ -97,16 +105,21 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 	connect(saveTool, &QPushButton::clicked, this, [this]()
 	{
 		// Saves a tool configuration to a local repo
-		::std::thread download([this]()
+		QThread* download = new QThread;
+		connect(download, &QThread::started, [this]()
 		{
 			currentRepo->AddTool(MakeToolFromInput());
 		});
+
+		connect(download, &QThread::finished, &QThread::deleteLater);
+		download->start();
 		QMessageBox::information(this,
 			::uft::qt("New tool in repository"),
 			::uft::qt("UniFlashTool will now verify informations about your new tool and will try to download it.")
 		);
-		download.join();
+		download->wait();
 		currentRepo->Save();
+		RefreshRepoList();
 	});
 	connect(getRecommendedForMyDevice, &QPushButton::clicked, this, [this] -> void
 	{
@@ -132,23 +145,34 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 		}
 		::std::string const codename = uft::Tools::Flash::GetConnectedDeviceCodename();
 		// Actual download
-		::std::thread
-			ofox([this, codename]
-			{
-				uft::Tools::ToolHandler::GetDefault()
-					->AddTool(uft::Tools::Recovery::OrangeFox(codename));
-			}),
-			lineage([this, codename]
-			{
-				// auto stores in default repo
-				auto rom = uft::Tools::ReadOnlyMemory::Lineage(codename);
-			});
+		QThread
+			*ofox		 = new QThread,
+			*lineage	 = new QThread;
+
+		connect(ofox, &QThread::started, [this, codename]
+		{
+			uft::Tools::ToolHandler::GetDefault()
+				->AddTool(uft::Tools::Recovery::OrangeFox(codename));
+				RefreshRepoList();
+		});
+
+		connect(lineage, &QThread::started, [this, codename]
+		{
+			auto rom = uft::Tools::ReadOnlyMemory::Lineage(codename);
+			RefreshRepoList();
+		});
+
+		for(auto& thread : { ofox, lineage })
+		{
+			connect(thread, &QThread::finished, &QThread::deleteLater);
+			thread->start();
+		}
 		
-		ofox.join();
-		lineage.join();
 	});
 
-	RefreshRepoList();
+	// RefreshRepoList();
+	updateToolsAndRepos(0);
+
 }
 
 void RepoDialog::RefreshRepoList()
@@ -157,29 +181,47 @@ void RepoDialog::RefreshRepoList()
 	for(::uft::Tools::ToolHandler* const repo : Repos)
 		repoList->addItem(QString(repo->GetPath().c_str()));
 	if(!repoList->count() || Repos.empty())
+	{
+		currentTool = 0;
+		RefreshToolView();
 		return;
+	}
 
 	if(!currentRepo->HasTools())
+	{
+		currentTool = 0;
+		RefreshToolView();
 		return;
-	::std::vector<::uft::Tools::Tool> tools;
-	QMessageBox downloadAlert = QMessageBox
+	}
+	
+	QMessageBox* downloadAlert = new QMessageBox
 	(
 		::uft::qt("Tools checks and downloads"),
 		::uft::qt("UniFlashTools is running some checks and downloads. This window will be closed automatically when everything will be set up."),
 		QMessageBox::Warning,
 		QMessageBox::Abort, QMessageBox::NoButton, QMessageBox::NoButton
 	);
-	downloadAlert.open();
-	::std::thread checkAndDownload([this, &tools]()
+	downloadAlert->open();
+	
+	auto future = QtConcurrent::run([this]()
 	{
-		tools = currentRepo->GetAll();
+		return currentRepo->GetAll();
 	});
-	checkAndDownload.join();
-	downloadAlert.close();
-	for(::uft::Tools::Tool const& tool : tools)
-		toolList->addItem(QString::fromStdString(tool.Name));
-	currentTool = &tools.at(0);
-	RefreshToolView();
+
+	QFutureWatcher<::std::vector<::uft::Tools::Tool>>* watcher = new QFutureWatcher<::std::vector<::uft::Tools::Tool>>(this);
+	connect(watcher, &QFutureWatcherBase::finished, [this, watcher, downloadAlert]() -> void
+	{
+		::std::vector<::uft::Tools::Tool> tools = watcher->result();
+		
+		downloadAlert->close();
+		toolList->clear();
+		for(::uft::Tools::Tool const& tool : tools)
+			toolList->addItem(QString::fromStdString(tool.Name));
+		if(tools.size() != 0)
+			currentTool = &tools.at(0);
+		RefreshToolView();
+	});
+	watcher->setFuture(future);
 }
 
 void RepoDialog::RefreshToolView()
@@ -197,10 +239,13 @@ void RepoDialog::RefreshToolView()
 	disconnect(removeTool, &QPushButton::clicked, 0, 0);
 	connect(removeTool, &QPushButton::clicked, this, [this] -> void
 	{
-		currentRepo->Remove(*currentTool);
+		::uft::Tools::Tool tool = GetToolFromList();
+		if(!currentTool || tool.Name.empty())
+			return;
+		currentRepo->Remove(tool);
 		currentRepo->Save();
 		RefreshRepoList();
-		AddTool(currentRepo);
+		// AddTool(currentRepo);
 	});
 
 }
@@ -262,6 +307,7 @@ void RepoDialog::AddTool(uft::Tools::ToolHandler* const repo)
 void RepoDialog::SeeRepo(uft::Tools::ToolHandler* const repo)
 {
 	QList<QString> toolNames;
+	toolList->clear();
 	::std::vector<::uft::Tools::Tool> tools = repo->GetAll();
 	for(::uft::Tools::Tool const& tool : tools)
 		toolNames << QString::fromStdString(tool.Name);
@@ -273,4 +319,14 @@ void RepoDialog::AddGithubTool(::uft::Tools::ToolHandler* const repo)
 	GitHubTool window(repo, this);
 
 	window.exec();
+}
+
+::uft::Tools::Tool RepoDialog::GetToolFromList()
+{
+	int index = toolList->currentIndex();
+	auto list = currentRepo->GetAll();
+	if(index >= list.size())
+		return {};
+	currentTool = (::uft::Tools::Tool*)&list.at(index);
+	return *currentTool;
 }

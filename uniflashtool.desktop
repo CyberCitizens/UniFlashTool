@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=UniFlash Tool
+Comment=Universal Flashing Tool for Android Devices
+Exec=uniflashtool
+Icon=uniflashtool
+Terminal=false
+Categories=Development;System;

@@ -7,15 +7,14 @@ namespace uft::Tools
 		
 	}
 
-	bool Config::Flash(QTextEdit* log)
+	bool Config::Flash()
 	{
-		auto logIfPossible = [log](QString const& str) -> void
+		auto logIfPossible = [this](QString const& str) -> void
 		{
-			if(log)
-				log->append(str);
+			statusUpdated(str);
 		};
 
-		auto waitForSideload = [this, log]() -> void
+		auto waitForSideload = [this]() -> void
 		{
 			emit requestUserAction(
 				::uft::qt("Flashing information"),
@@ -61,7 +60,7 @@ namespace uft::Tools
 		{
 			logIfPossible(::uft::qt("UniFlashTool will now format all data on the device."));
 			if(!Platform::CheckForCommandExecution(
-				Flash::FastBoot::Format(log)
+				Flash::FastBoot::Format()
 			))
 			{
 				logIfPossible(::uft::qt(
@@ -74,7 +73,7 @@ namespace uft::Tools
 			));
 		}
 		logIfPossible(::uft::qt("Serious shit about to happen, let's flash a recovery image !\n"));
-		if(!Recovery.Flash(log))
+		if(!Recovery.Flash())
 		{
 			logIfPossible(::uft::qt("Well, shit happened ! Let's stop it right there, and look at the error.\n"));
 			Flash::FastBoot::Reboot(Flash::PARTITION::SYSTEM);
@@ -85,12 +84,12 @@ namespace uft::Tools
 		last_flash_step = _RECOVERY;
 		
 		logIfPossible(::uft::qt("Passed the test ! Let's get it to the serious things.\n"));
-		if(!ROM.Flash(log))
+		if(!ROM.Flash())
 		{
 			logIfPossible(::uft::qt("Unfortunately, mandatory hardware communication tools couldn't be flashed on the device. Abort operation !"));
 			return false;
 		}
-		logIfPossible(::uft::qt("Let's go ! every mandatory tool has been flashed. Let's reboot in recovery mode !"));
+		logIfPossible(::uft::qt("Let's go ! every mandatory tool (Boot Image and DTBO) has been flashed. Let's reboot in recovery mode !"));
 		
 		Flash::FastBoot::Reboot(Flash::RECOVERY);
 		Flash::WaitForState(Flash::STATE_RECOVERY);
@@ -100,8 +99,9 @@ namespace uft::Tools
 		logIfPossible(::uft::qt("We made it to the recovery mode ! Now let's load the system's components."));
 		logIfPossible(::uft::qt("Please enable the ADB Sideload bridge by tapping the bottom-right menu -> ADB & Sideload -> \"Swipe to Start Sideload\"."));
 		waitForSideload();
+		logIfPossible(::uft::qt("Began sideloading the ROM !"));
 		
-		if(!ROM.LoadROM(log))
+		if(!ROM.LoadROM())
 		{
 			logIfPossible(::uft::qt("An error occurred while transferring the system data. Please reiterate, UniFlashTool will retry from here."));
 			return false;
@@ -111,7 +111,7 @@ namespace uft::Tools
 		
 		TOOLS:
 		last_flash_step = _TOOLS;
-		if(!ROM.LoadTools(log))
+		if(!ROM.LoadTools())
 		{
 			logIfPossible(::uft::qt(
 				"Oh no ! Some of the tools you selected for install could not be installed on your device. Try again ! Your system is, however, usable at this point."

@@ -41,6 +41,53 @@
 	"Repository settings for " : "Repository settings for ",
 	"Add tool to current repository" : "Add tool to current repository",
 	"Add a tool from GitHub" : "Add a tool from GitHub",
-	"The current user must be added to the \"android\" group before UniFlashTool can use Android tools.\n\nTo do this, please run <pre>%1</pre> in a terminal, as administrator."
-		: "The current user must be added to the \"android\" group before UniFlashTool can use Android tools.\n\nTo do this, please run <pre>%1</pre> in a terminal, as administrator."
+		"The current user must be added to the \"android\" group before UniFlashTool can use Android tools.\n\nTo do this, please run <pre>%1</pre> in a terminal, as administrator."
+		: "The current user must be added to the \"android\" group before UniFlashTool can use Android tools.\n\nTo do this, please run <pre>%1</pre> in a terminal, as administrator.",
+	"Warning regarding user groups" : "Warning regarding user groups",
+	"Repository" : "Repository",
+	"Repository:" : "Repository:",
+	"Repository: " : "Repository: ",
+
+	"Tool" : "Tool",
+	"Tool:" : "Tool:",
+	"Tool: " : "Tool: ",
+
+	"Look for tool on GitHub and save it in the current repository"
+		: "Look for tool on GitHub and save it in the current repository",
+	"GitHub Repository:" : "GitHub Repository:",
+	"GitHub Repository" : "GitHub Repository",
+	"Image Archive" : "Image Archive",
+	"Android Archive" : "Android Archive (apk)",
+	"Save configuration for this tool" : "Save configuration for this tool",
+	"Remove tool from Repository and Disk" : "Remove tool from Repository and Disk",
+	"Get recommended tools for my device" : "Get recommended tools for my device",
+	"Data Tree Blob for Overlay image (DTBO)" : "Data Tree Blob for Overlay image (DTBO)",
+	"Boot image" : "Boot image",
+	"Recovery" : "Recovery",
+	"ROM" : "ROM",
+	"Rooting tool" : "Rooting tool",
+	"Integrity fix" : "Integrity fix",
+	"This will download the latest version of LineageOS and of OrangeFox Recovery for your device. Do you agree ?\nThis procedure can freeze UniFlashTool for several minutes depending on your network strength."
+		: "This will download the latest version of LineageOS and of OrangeFox Recovery for your device. Do you agree ?\nThis procedure can freeze UniFlashTool for several minutes depending on your network strength.",
+	"The operation were aborted. No tool were downloaded." : "The operation were aborted. No tool were downloaded.",
+	"Author" : "Author",
+	"Regular Expression describing the artifact to look for in releases (optional)"
+		: "Regular Expression describing the artifact to look for in releases (optional)",
+	"Git tag to look for in releases (optional)"
+		: "Git tag to look for in releases (optional)",
+	"GitHub tool retrieval" : "GitHub tool retrieval",
+	"Unable to load repository named \"%1\" by \"%2\". Check availability or spelling, maybe ?"
+		: "Unable to load repository named \"<pre>%1</pre>\" by \"<pre>%2</pre>\". Check availability or spelling, maybe ?",
+	"Your tool has been successfully downloaded and added to your library. You can close this window now."
+		: "Your tool has been successfully downloaded and added to your library. You can close this window now.",
+	"Add tool to config" : "Add tool to config",
+	"Remove tool from config" : "Remove tool from config",
+	"Flash config" : "Flash config",
+	"Current configuration:" : "Current configuration",
+	"Wipe data before flashing (DO BACKUPS FIRST, ALL DATA WILL BE LOST !)"
+		: "Wipe data before flashing (DO BACKUPS FIRST, ALL DATA WILL BE LOST !)",
+	"The flashing process will now begin with device %1. You can still cancel this process by clicking the \"Cancel\" button below."
+		: "The flashing process will now begin with device <pre>%1</pre>. You can still cancel this process by clicking the \"Cancel\" button below.",
+	"Please enable the ADB Sideload bridge by tapping the bottom-right menu -> ADB & Sideload -> \"Swipe to Start Sideload\"."
+		: "Please enable the ADB Sideload bridge by tapping the bottom-right menu -> ADB & Sideload -> \"Swipe to Start Sideload\"."
 }

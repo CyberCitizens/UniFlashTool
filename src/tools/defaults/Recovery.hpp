@@ -24,7 +24,7 @@ namespace uft::Tools
 		
 		::std::optional<::std::string> GetImageFromArchive() const; // Extracts content from an archive, looking for an .img file.
 		// Flashes this Recovery image into a connected device.
-		bool Flash(QTextEdit* log) const;
+		bool Flash(QTextEdit* log = 0) const;
 	};
 }
 

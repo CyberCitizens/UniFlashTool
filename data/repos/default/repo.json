@@ -1,11 +1,11 @@
 {
 	"repo_path": "data/repos/default",
-	"timestamp": 1775623124,
+	"timestamp": 1775740473,
 	"tools": [
 		{
 			"archive_name": "dtbo.img",
 			"name": "LineageOS's DTBO for sweet",
-			"source": "https://mirrorbits.lineageos.org/full/sweet/20260402/dtbo.img",
+			"source": "https://mirrorbits.lineageos.org/full/sweet/20260409/dtbo.img",
 			"source_type": 3,
 			"target_device": "sweet",
 			"type": 0
@@ -21,33 +21,25 @@
 		{
 			"archive_name": "boot.img",
 			"name": "LineageOS's boot for sweet",
-			"source": "https://mirrorbits.lineageos.org/full/sweet/20260402/boot.img",
+			"source": "https://mirrorbits.lineageos.org/full/sweet/20260409/boot.img",
 			"source_type": 3,
 			"target_device": "sweet",
 			"type": 1
 		},
 		{
-			"archive_name": "lineage-23.2-20260402-nightly-sweet-signed.zip",
+			"archive_name": "lineage-23.2-20260409-nightly-sweet-signed.zip",
 			"name": "LineageOS for sweet",
-			"source": "https://mirrorbits.lineageos.org/full/sweet/20260402/lineage-23.2-20260402-nightly-sweet-signed.zip",
+			"source": "https://mirrorbits.lineageos.org/full/sweet/20260409/lineage-23.2-20260409-nightly-sweet-signed.zip",
 			"source_type": 1,
 			"target_device": "sweet",
 			"type": 3
 		},
 		{
-			"archive_name": "Magisk.zip",
+			"archive_name": "Magisk-v30.7.apk",
 			"name": "Magisk",
 			"source": "https://github.com/topjohnwu/Magisk/releases/download/v30.7/Magisk-v30.7.apk",
 			"source_type": 0,
 			"type": 4,
-			"version": ""
-		},
-		{
-			"archive_name": "PlayIntegrityFix_v4.5-inject-s.zip",
-			"name": "PlayIntegrityFix",
-			"source": "https://github.com/KOWX712/PlayIntegrityFix/releases/download/v4.5-inject-s/PlayIntegrityFix_v4.5-inject-s.zip",
-			"source_type": 0,
-			"type": 5,
 			"version": ""
 		}
 	]

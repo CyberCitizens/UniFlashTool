@@ -161,7 +161,7 @@ namespace uft::Tools
 			// Also downloads it if it's present but not downloaded.
 			::std::optional<Tool*> Get(::std::string const& toolName, bool fetch = true);
 			// Fetches every tool in this repo (updates if not present) and get them on a vector.
-			::std::vector<Tool> const GetAll();
+			::std::vector<Tool> const& GetAll();
 
 			// Getter for LocalRepoPath.
 			::std::string GetPath() const;
@@ -176,6 +176,12 @@ namespace uft::Tools
 				if(!_tpath)
 					return ::std::nullopt;
 				return LocalRepoPath + "/" + *_tpath;
+			}
+
+			static void Free()
+			{
+				for(auto& repo : Repos)
+					delete repo.second;
 			}
 
 			~ToolHandler() = default;

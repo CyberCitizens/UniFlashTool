@@ -30,7 +30,7 @@ namespace uft::Tools
 			void requestUserAction(QString title, QString message);
 		public:
 		Config(ReadOnlyMemory const rom, class Recovery const recovery, bool wipeData = false);
-		bool Flash(QTextEdit *log = 0);
+		bool Flash();
 	} ;
 }
 

@@ -16,6 +16,8 @@
 #include <QTextBlock>
 #include <qlineedit.h>
 #include <QToolBar>
+#include <QThread>
+#include <QtConcurrent/QtConcurrent>
 #include "../../tools/flash.h"
 #include "../../tools/Config.hpp"
 #include "GitHubTool.hpp"
@@ -66,6 +68,8 @@ private:
 	
 	// Makes a tool from the informations the user has input.
 	::uft::Tools::Tool MakeToolFromInput() const;
+
+	::uft::Tools::Tool GetToolFromList();
 
 
 public:

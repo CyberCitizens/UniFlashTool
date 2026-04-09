@@ -64,8 +64,6 @@ namespace uft::Tools::Flash
 	{
 		if(::std::filesystem::exists(filePath) && !::std::filesystem::is_directory(filePath))
 		{
-			if(log)
-				log->append(::uft::qt("No device connected. Please provide a connected Android device before trying to sideload any file and / or archive.") + UFT_ERROR_TAG);
 			WaitForSideload();
 			if(log)
 				return Platform::RunCommand("adb", { "sideload", filePath.c_str() }, -1, log);

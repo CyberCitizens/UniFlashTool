@@ -198,9 +198,9 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 			QThread* worker = new QThread;
 			_Config->moveToThread(worker);
 
-			connect(worker, &QThread::started, [log, _Config]()
+			connect(worker, &QThread::started, [_Config]()
 			{
-				_Config->Flash(log);
+				_Config->Flash();
 			});
 			connect(_Config, &Config::requestUserAction, this, [this](QString title, QString message) {
 				QMessageBox::information(this, title, message);

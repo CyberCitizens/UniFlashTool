@@ -264,23 +264,6 @@ namespace uft::Tools
 					{}
 					 */
 				}
-				// Look for Content-Disposition: attachment; filename="Magisk-v28.0.zip"
-				// If tool.ArchiveName is already set, don't bother to rewrite it. Keep the right value.
-				if (!tool->ArchiveName && header.find("Content-Disposition") != std::string::npos) {
-					size_t pos = header.find("filename=");
-					if (pos != std::string::npos)
-					{
-						pos += 9;  // Skip "filename="
-						char quote = header[pos];
-						if (quote == '"' || quote == '\'') {
-							pos++;  // Skip quote
-							size_t end = header.find(quote, pos);
-							tool->ArchiveName = header.substr(pos, end - pos);
-							return size * count;
-						}
-					}
-					else return size * count;
-				}
 				return size * count;
 			}
 		));
@@ -328,7 +311,13 @@ namespace uft::Tools
 			}
 			return false;
 		}
-		::std::filesystem::rename(temp, path + "/" + *tool->ArchiveName);
+		try
+		{
+			::std::filesystem::rename(temp, path + "/" + *tool->ArchiveName);
+		} catch(::std::filesystem::filesystem_error err)
+		{
+			::std::cerr << err.what() << ::std::endl;
+		}
 		Save();
 		return true;
 	}
@@ -401,7 +390,7 @@ namespace uft::Tools
 		return !LocalTools.empty();
 	}
 	
-	::std::vector<Tool> const ToolHandler::GetAll()
+	::std::vector<Tool> const& ToolHandler::GetAll()
 	{
 		std::vector<Tool*> toolsToProcess;
 		{
@@ -447,8 +436,8 @@ namespace uft::Tools
 		{
 			::std::string path =
 				LocalRepoPath + (tool->TargetDevice ? "/" + *tool->TargetDevice + "/" : "/") + tool->Name;
-			if(::std::filesystem::exists(path + "/" + *tool->ArchiveName))
-				::std::filesystem::remove(path + "/" + *tool->ArchiveName);
+			if(::std::filesystem::exists(path))
+				::std::filesystem::remove_all(path);
 			if(::std::filesystem::exists(path))
 				::std::filesystem::remove(path);
 			LocalTools.erase(LocalTools.begin() + where); // we erase it

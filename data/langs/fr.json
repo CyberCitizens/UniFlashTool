@@ -43,5 +43,50 @@
 	"Add tool to current repository" : "Ajouter un outil au dépôt actuel",
 	"Add a tool from GitHub" : "Ajouter un outil depuis GitHub",
 	"The current user must be added to the \"android\" group before UniFlashTool can use Android tools.\n\nTo do this, please run <pre>%1</pre> in a terminal, as administrator."
-		: "L'utilisateur actuel doit être ajouté au groupe \"android\" pour utiliser les outils Android avec UniFlashTool. Afin d'ajouter l'utilisateur au groupe, veuillez exécuter la commande <pre>%1</pre> dans un terminal de commande en tant qu'administrateur."
+		: "L'utilisateur actuel doit être ajouté au groupe \"android\" pour utiliser les outils Android avec UniFlashTool. Afin d'ajouter l'utilisateur au groupe, veuillez exécuter la commande <pre>%1</pre> dans un terminal de commande en tant qu'administrateur.",
+	"Warning regarding user groups" : "Avertissement à propos des groupes de l'utilisateur",
+	"Repository" : "Dépôt",
+	"Repository:" : "Dépôt:",
+	"Repository: " : "Dépôt: ",
+
+	"Tool" : "Outil",
+	"Tool:" : "Outil:",
+	"Tool: " : "Outil: ",
+
+	"Look for tool on GitHub and save it in the current repository"
+		: "Chercher l'outil sur GitHub et le sauvegarder dans le dépôt actuel",
+	"GitHub Repository:" : "Dépôt GitHub:",
+	"GitHub Repository" : "Dépôt GitHub",
+	"Image Archive" : "Archive d'image",
+	"Android Archive" : "Archive Android (apk)",
+	"Save configuration for this tool" : "Enregistrer la configuration de cet outil",
+	"Remove tool from Repository and Disk" : "Supprimer cet outil du dépôt local et du disque",
+	"Get recommended tools for my device" : "Récupérer les outils recommandés pour mon appareil",
+	"Data Tree Blob for Overlay image (DTBO)" : "Blob d'arbre de données pour image d'overlay (DTBO)",
+	"Boot image" : "Image de démarrage",
+	"Recovery" : "Outil de récupération",
+	"ROM" : "Environnement système (ROM)",
+	"Rooting tool" : "Outil super-utilisateur",
+	"Integrity fix" : "Outil de restauration d'intégrité",
+	"This will download the latest version of LineageOS and of OrangeFox Recovery for your device. Do you agree ?\nThis procedure can freeze UniFlashTool for several minutes depending on your network strength."
+		: "Cette action va télécharger la dernière version disponible de LineageOS ainsi que celle d'OrangeFox. Êtes vous d'accord ? Cette procédure peut \"geler\" l'application pendant plusieurs minutes durant la force de votre signal Internet.",
+	"The operation were aborted. No tool were downloaded." : "L'opération a été annulée. Aucun outil supplémentaire n'a été installé.",
+	"Author" : "Auteur",
+	"Regular Expression describing the artifact to look for in releases (optional)"
+		: "Expression régulière décrivant l'artéfact à récupérer depuis la release (optionnel)",
+	"Git tag to look for in releases (optional)"
+		: "Tag Git à chercher dans le dépôt (optionnel)",
+	"GitHub tool retrieval" : "Récupération d'outil GitHub",
+	"Unable to load repository named \"%1\" by \"%2\". Check availability or spelling, maybe ?"
+		: "Impossible de charger le dépôt distant nommé \"<pre>%1</pre>\" par \"<pre>%2</pre>\". Vérifiez peut-être l'orthographe de ces informations ?",
+	"Your tool has been successfully downloaded and added to your library. You can close this window now."
+		: "Vos outils ont été téléchargés avec succès et ajoutés à votre bibliothèque. Vous pouvez maintenant fermer cette fenêtre.",
+	"Add tool to config" : "Ajouter l'outil à la configuration",
+	"Remove tool from config" : "Retirer l'outil de la configuration",
+	"Flash config" : "Flasher la configuration",
+	"Current configuration:" : "Configuration actuelle:",
+	"Wipe data before flashing (DO BACKUPS FIRST, ALL DATA WILL BE LOST !)"
+		: "Supprimer les données sur le téléphone et formater le disque avant de flasher (FAITES VOS SAUVEGARDES AVANT, TOUTES LES DONNÉES PRÉSENTES SUR L'APPAREIL SERONT PERDUES !)",
+	"The flashing process will now begin with device %1. You can still cancel this process by clicking the \"Cancel\" button below."
+		: "Le processus de flash va maintenant commencer avec l'appareil <pre>%1</pre>. Vous pouvez encore annuler ce processus en cliquant sur le bouton \"Annuler\" ci-dessous."
 }

@@ -75,7 +75,10 @@ namespace uft::Platform
 		} catch(...) {
 			::std::string const errors = process->readAllStandardError().trimmed().toStdString();
 			::std::string const output = process->readAllStandardOutput().trimmed().toStdString();
-			return output + "\n" + UFT_ERROR_TAG + "Errors:\n" + errors;
+			::std::string const final = output + "\n" + UFT_ERROR_TAG + "Errors:\n" + errors;
+			qDebug() << final;
+			::std::cout << final << ::std::endl;
+			return final;
 		}
 		return process->readAllStandardOutput().toStdString();
 	}
@@ -101,6 +104,9 @@ namespace uft::Platform
 		// sometimes they be writing on stderr for some reason. collect both, worst case
 		// errors is empty and an empty newline gets appended to a no-error string.
 			return output + "\n" + errors;
+		::std::string const final = output + "\n" + UFT_ERROR_TAG + "Errors:\n" + errors;
+		qDebug() << final;
+		::std::cout << final << ::std::endl;
 		return output + "\n" + UFT_ERROR_TAG + "Errors:\n" + errors + "\nExit code: " + ::std::to_string(exitCode);
 	}
 

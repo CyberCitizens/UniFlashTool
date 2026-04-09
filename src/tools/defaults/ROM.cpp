@@ -97,13 +97,12 @@ namespace uft::Tools
 	{
 		auto toolPath = Origin->GetToolPath(ROM);
 		if(!toolPath)
-		{
-			if(log)
-				log->append(::uft::qt("Cannot find a path to the ROM. Aborting.\n"));
 			return false;
-		}
 		::std::string const commandOutput = Flash::Sideload(*toolPath, log);
-		return Platform::CheckForCommandExecution(commandOutput);
+		bool commandError = Platform::CheckForCommandExecution(commandOutput);
+		if(commandOutput.find("Success") != ::std::string::npos)
+			return true;
+		return commandError;
 	}
 	
 	bool ReadOnlyMemory::Flash(QTextEdit *log) const
@@ -149,6 +148,7 @@ namespace uft::Tools
 
 	bool ReadOnlyMemory::LoadTools(QTextEdit *log) const
 	{
+		Flash::WaitForState(Flash::DEVICE_STATE::STATE_SIDELOAD);
 		bool success = true;
 		for(auto const& tool : {
 			Root,
@@ -160,7 +160,6 @@ namespace uft::Tools
 			::std::optional<::std::string> toolPath = Origin->GetToolPath(*tool);
 			if(!toolPath)
 				continue;
-			// log->append(::uft::qt("Please enable ADB Sideload bridge again..."));
 			Flash::WaitForSideload();
 			if(!Platform::CheckForCommandExecution(
 				Flash::Sideload(*toolPath, log)
