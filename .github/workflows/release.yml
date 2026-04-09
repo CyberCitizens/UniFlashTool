@@ -36,6 +36,10 @@ jobs:
           cache: false
           host: ${{ matrix.os == 'windows-latest' && 'windows' || (matrix.os == 'macos-latest' && 'mac' || 'linux') }}
           target: 'desktop'
+      
+      - name: Set up MSVC dev cmd
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
 
       # MacOS only action:
       - name: Install Dependencies (macOS)
@@ -78,8 +82,14 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
+          if (Test-Path "build/Release/translations") { Remove-Item -Recurse -Force "build/Release/translations" }
+          $env:VCINSTALLDIR = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC"
           cd build/Release
-          windeployqt --qmldir ../.. uniflashtool.exe
+          & "D:\a\UniFlashTool\UniFlashTool\Qt\Qt\6.5.0\msvc2019_64\bin\windeployqt.exe" `
+            --qmldir ../.. `
+            --plugindir ./plugins `
+            --no-compiler-runtime `
+            uniflashtool.exe
           cd ../..
           Compress-Archive -Path build/Release/* -DestinationPath UniFlashTool-Windows.zip
 
