@@ -2,6 +2,10 @@ name: Release UniFlashTool
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents:
+    write
+
 on:
   push:
     tags:
@@ -93,17 +97,36 @@ jobs:
           export VERSION=${{ github.ref_name }}
           ./linuxdeployqt-continuous-x86_64.AppImage dist/usr/bin/uniflashtool -appimage -always-overwrite -unsupported-allow-new-glibc
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-          files: |
+          if-no-files-found: ignore
+          name: binary-${{ matrix.os }}
+          path: |
             UniFlashTool-Windows.zip
             uniflashtool-*.AppImage
             UniFlashTool-MacOS.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ./artifacts/UniFlashTool-Windows.zip
+            ./artifacts/uniflashtool-*.AppImage
+            ./artifacts/UniFlashTool-MacOS.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
