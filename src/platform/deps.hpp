@@ -4,6 +4,7 @@
 #ifndef UFT_DEPS
 #define UFT_DEPS
 
+#include <sstream>
 #include <QApplication>
 #include <QPushButton>
 #include <QVBoxLayout>

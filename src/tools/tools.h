@@ -4,6 +4,7 @@
 #ifndef UFT_TOOLS
 #define UFT_TOOLS
 
+#include <sstream>
 #include <curlpp/Easy.hpp>
 #include <optional>
 #include <fstream>
