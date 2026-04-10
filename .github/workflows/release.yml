@@ -57,7 +57,7 @@ jobs:
       - name: Install Dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
-          vcpkg install libarchive:x64-windows curl:x64-windows
+          vcpkg install libarchive:x64-windows curl:x64-windows curlpp:x64-windows
 
       - name: Build UniFlashTool
         shell: bash
@@ -90,14 +90,9 @@ jobs:
           
           Write-Host "Recherche des DLL dans : $dllPath"
           
-          if (Test-Path $dllPath) {
-              Write-Host "Dossier vcpkg trouvé, copie des dépendances..."
-              Copy-Item "$dllPath/*.dll" "deploy/bin/" -ErrorAction SilentlyContinue
-          } else {
-              Write-Warning "Chemin vcpkg introuvable, tentative de secours via le cache local..."
-              # Secours : cherche n'importe quelle DLL de vcpkg dans le workspace
-              Get-ChildItem -Path "**/installed/x64-windows/bin/*.dll" -Recurse | Copy-Item -Destination "deploy/bin/"
-          }
+          Get-ChildItem -Path "$vcpkgRoot/installed/x64-windows/bin/*.dll" -ErrorAction SilentlyContinue | Copy-Item -Destination "deploy/bin/"
+          # Au cas où elles soient dans ton propre dossier de build (via CMake)
+          Get-ChildItem -Path "build/*.dll" -Recurse | Copy-Item -Destination "deploy/bin/"
           
           $env:VCINSTALLDIR = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC"
           cd deploy/bin
@@ -154,7 +149,7 @@ jobs:
         with:
           files: |
             ./artifacts/UniFlashTool-Windows.zip
-            ./artifacts/uniflashtool-*.AppImage
+            ./artifacts/*.AppImage
             ./artifacts/UniFlashTool-MacOS.dmg
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=UniFlash Tool
+Name=UniFlashTool
 Comment=Universal Flashing Tool for Android Devices
 Exec=uniflashtool
 Icon=uniflashtool
