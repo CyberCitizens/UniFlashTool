@@ -85,12 +85,20 @@ jobs:
           New-Item -ItemType Directory -Force -Path "deploy/bin"
           Copy-Item "build/Release/uniflashtool.exe" "deploy/bin/"
           
-          $VCPKG_BIN = "C:/vcpkg/installed/x64-windows/bin"
-          Copy-Item "$VCPKG_BIN/curlpp.dll" "deploy/bin/"
-          Copy-Item "$VCPKG_BIN/archive.dll" "deploy/bin/"
-          Copy-Item "$VCPKG_BIN/libcurl.dll" "deploy/bin/"
-          Copy-Item "$VCPKG_BIN/*.dll" "deploy/bin/" -ErrorAction SilentlyContinue
-
+          $vcpkgRoot = $env:VCPKG_INSTALLATION_ROOT
+          $dllPath = "$vcpkgRoot/installed/x64-windows/bin"
+          
+          Write-Host "Recherche des DLL dans : $dllPath"
+          
+          if (Test-Path $dllPath) {
+              Write-Host "Dossier vcpkg trouvé, copie des dépendances..."
+              Copy-Item "$dllPath/*.dll" "deploy/bin/" -ErrorAction SilentlyContinue
+          } else {
+              Write-Warning "Chemin vcpkg introuvable, tentative de secours via le cache local..."
+              # Secours : cherche n'importe quelle DLL de vcpkg dans le workspace
+              Get-ChildItem -Path "**/installed/x64-windows/bin/*.dll" -Recurse | Copy-Item -Destination "deploy/bin/"
+          }
+          
           $env:VCINSTALLDIR = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC"
           cd deploy/bin
           
