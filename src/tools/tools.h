@@ -11,6 +11,7 @@
 #include <regex>
 #include <format>
 #include <map>
+#include <deque>
 #include "../gui/Translate.hpp"
 
 namespace uft::Tools

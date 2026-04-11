@@ -18,6 +18,7 @@
 #include <QToolBar>
 #include <QThread>
 #include <QtConcurrent/QtConcurrent>
+#include <deque>
 #include "../../tools/flash.h"
 #include "../../tools/Config.hpp"
 #include "GitHubTool.hpp"

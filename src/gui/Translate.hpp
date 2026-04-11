@@ -7,6 +7,7 @@
 #include <shared_mutex>
 #include <mutex>
 #include <thread>
+#include <deque>
 
 namespace uft
 {
