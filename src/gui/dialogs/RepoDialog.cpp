@@ -74,9 +74,10 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 		if(Repos.size() < 1 || repoIndex < 0)
 			return;
 		currentRepo = Repos.at(repoIndex);
+		auto * const cr = currentRepo;
 		RefreshRepoList();
-		if(currentRepo->HasTools())
-			currentTool = (::uft::Tools::Tool*)&currentRepo->GetAll().at(0);
+		if(cr->HasTools())
+			currentTool = (::uft::Tools::Tool*)&cr->GetAll().at(0);
 		RefreshToolView();
 	};
 
@@ -149,17 +150,19 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 			*ofox		 = new QThread,
 			*lineage	 = new QThread;
 
+		
+
 		connect(ofox, &QThread::started, [this, codename]
 		{
 			uft::Tools::ToolHandler::GetDefault()
 				->AddTool(uft::Tools::Recovery::OrangeFox(codename));
-				RefreshRepoList();
+			QMetaObject::invokeMethod(this, "RefreshRepoList", Qt::QueuedConnection);
 		});
 
 		connect(lineage, &QThread::started, [this, codename]
 		{
 			auto rom = uft::Tools::ReadOnlyMemory::Lineage(codename);
-			RefreshRepoList();
+			QMetaObject::invokeMethod(this, "RefreshRepoList", Qt::QueuedConnection);
 		});
 
 		for(auto& thread : { ofox, lineage })
@@ -208,10 +211,10 @@ void RepoDialog::RefreshRepoList()
 		return currentRepo->GetAll();
 	});
 
-	QFutureWatcher<::std::vector<::uft::Tools::Tool>>* watcher = new QFutureWatcher<::std::vector<::uft::Tools::Tool>>(this);
+	QFutureWatcher<::std::deque<::uft::Tools::Tool>>* watcher = new QFutureWatcher<::std::deque<::uft::Tools::Tool>>(this);
 	connect(watcher, &QFutureWatcherBase::finished, [this, watcher, downloadAlert]() -> void
 	{
-		::std::vector<::uft::Tools::Tool> tools = watcher->result();
+		::std::deque<::uft::Tools::Tool> tools = watcher->result();
 		
 		downloadAlert->close();
 		toolList->clear();
@@ -308,7 +311,7 @@ void RepoDialog::SeeRepo(uft::Tools::ToolHandler* const repo)
 {
 	QList<QString> toolNames;
 	toolList->clear();
-	::std::vector<::uft::Tools::Tool> tools = repo->GetAll();
+	auto tools = repo->GetAll();
 	for(::uft::Tools::Tool const& tool : tools)
 		toolNames << QString::fromStdString(tool.Name);
 	toolList->addItems(toolNames);

@@ -82,9 +82,21 @@ namespace uft::Tools::Flash
 
 	::std::string const FastBoot::Format(QTextEdit* log)
 	{
+		::std::string output;
+		auto fastFlash = [&output](QStringList const& args) -> bool
+		{
+			output += Platform::RunCommand("fastboot", args) + "\n";
+			return Platform::CheckForCommandExecution(output);
+		};
 		if(!FastBoot::HasDevice())
 			return "FastBoot got no device attached and ready. Please try again later." + ::std::string(UFT_ERROR_TAG);
-		return Platform::RunCommand("fastboot", { "-w" });
+		for(QStringList const& argList : ::std::initializer_list<QStringList>{
+			{ "-w" },
+			{ "erase", "system" },
+			{ "format:ext4", "userdata" },
+		})
+			if(!fastFlash(argList))
+				return output;
 	}
 
 	void FastBoot::WaitForFastBoot()

@@ -7,7 +7,7 @@ namespace uft::Tools
 		Tool _DTBO,
 		Tool _Boot,
 		ToolHandler * const _Origin
-	) : Origin{_Origin}
+	) : Origin{_Origin ? _Origin : ToolHandler::GetDefault()}
 	{
 		ROM = _ROM;
 		DTBO = _DTBO;
@@ -26,7 +26,7 @@ namespace uft::Tools
 		}
 	}
 
-	ReadOnlyMemory const ReadOnlyMemory::Lineage(::std::string const& device)
+	ReadOnlyMemory const ReadOnlyMemory::Lineage(::std::string const& device, ToolHandler * const _Origin)
 	{
 		::std::string const lineageUrl = "https://download.lineageos.org/api/v1/" + device + "/nightly/ether";
 		::nlohmann::json const mirrors = ::nlohmann::json::parse(HttpGet(lineageUrl));
@@ -61,7 +61,8 @@ namespace uft::Tools
 				remoteRepositoryPath + "/boot.img",
 				::std::nullopt,
 				::std::nullopt
-			}
+			},
+			_Origin
 		);
 	}
 

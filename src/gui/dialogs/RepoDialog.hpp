@@ -50,9 +50,9 @@ private:
 
 	QPushButton *removeTool			= new QPushButton(::uft::qt("Remove tool from Repository and Disk"));
 	
-	::uft::Tools::ToolHandler* 	currentRepo = ::uft::Tools::ToolHandler::GetDefault(); // repo that's currently edited
+	::uft::Tools::ToolHandler* volatile 	currentRepo = ::uft::Tools::ToolHandler::GetDefault(); // repo that's currently edited
 	::uft::Tools::Tool*			currentTool = 0;
-//private slots:
+private slots:
 	// Adds a new local repository
 	void AddLocalRepo();
 	// Refreshes UI elements to see Repository settings about the current repository

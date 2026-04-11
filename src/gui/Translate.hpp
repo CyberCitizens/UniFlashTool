@@ -5,6 +5,7 @@
 #include <QString>
 #include <fstream>
 #include <shared_mutex>
+#include <mutex>
 #include <thread>
 
 namespace uft

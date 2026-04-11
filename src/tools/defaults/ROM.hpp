@@ -25,10 +25,10 @@ namespace uft::Tools
 			Tool _ROM,
 			Tool _DTBO,
 			Tool _Bootloader,
-			ToolHandler * const _Origin = ToolHandler::GetDefault()
+			ToolHandler * const _Origin = 0
 		);
 
-		static ReadOnlyMemory const Lineage(::std::string const& device);
+		static ReadOnlyMemory const Lineage(::std::string const& device, ToolHandler * const _Origin = 0);
 
 		// Sets or add (if not already present) this tool as a holder of this tool's role (tool type).
 		ReadOnlyMemory* set(Tool tool);

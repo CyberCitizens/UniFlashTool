@@ -7,13 +7,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(MSVC)
     # Flags for Windows (MSVC)
     add_compile_options(/W3 /utf-8) 
-    set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi") # /Od = no optimization, /Zi = debug infos
-    set(CMAKE_CXX_FLAGS_RELEASE "/Od")
+    set(CMAKE_CXX_FLAGS_DEBUG "/3d /Zi") # /Od = no optimization, /Zi = debug infos
+    set(CMAKE_CXX_FLAGS_RELEASE "/3d")
 else()
     # Flags pour Linux/macOS (GCC/Clang)
     add_compile_options(-pipe -Wno-unknown-argument)
-    set(CMAKE_CXX_FLAGS_DEBUG "-march=native -O0 -g")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O0 -pipe")
+    set(CMAKE_CXX_FLAGS_DEBUG "-march=native -O3 -g")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -pipe")
 endif()
 
 set(CMAKE_CXX_STANDARD 20)

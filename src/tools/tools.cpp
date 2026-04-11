@@ -92,21 +92,27 @@ namespace uft::Tools
 
 	ToolHandler* ToolHandler::GetOrCreateRepo(::std::string const& path)
 	{
-		::std::shared_lock<::std::shared_mutex> slrm(RepoListMutex);
+		::std::unique_lock<::std::shared_mutex> ulrm(RepoListMutex);
 		if(Repos.find(path) != Repos.end())
 			return Repos.at(path);
-		slrm.unlock();
 		if(::std::filesystem::exists(path + "/repo.json"))
+		{
+			ulrm.unlock();
 			return Load(path);
+		}
 		return new ToolHandler(path);
 	}
 
 	ToolHandler::ToolHandler(::std::string const& localRepo)
 	{
+		if(Repos.find(localRepo) != Repos.end())
+		{
+			LocalRepoPath = localRepo;
+			return;
+		}
 		if(!::std::filesystem::exists(localRepo))
 			::std::filesystem::create_directories(localRepo);
 		LocalRepoPath = localRepo;
-		::std::lock_guard<::std::shared_mutex> ulrm(RepoMutex);
 		Repos.emplace(LocalRepoPath, this); // add this repo to the list of all instanciated repos
 	}
 
@@ -217,14 +223,13 @@ namespace uft::Tools
 	
 	bool ToolHandler::Download(Tool* tool, ::std::string const& source)
 	{
-		size_t expected_content_length = -1;
 		::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);
+		size_t expected_content_length = -1;
 		if(!tool->Source)
 			tool->Source = source;
 		::std::string const
 			path = LocalRepoPath + "/" + (tool->TargetDevice ? *tool->TargetDevice + "/" : "") + tool->Name,
 			temp = path + "/tempArchive.blob";
-		slrm.unlock();
 		if(!::std::filesystem::exists(path))
 			::std::filesystem::create_directories(path);
 		::std::ofstream archive(temp);
@@ -274,6 +279,8 @@ namespace uft::Tools
 				return fileName; // extension already present
 			return fileName + extension;
 		};
+		slrm.unlock();
+		::std::unique_lock<::std::shared_mutex> ulrm(RepoMutex);
 
 		if(!tool->ArchiveName)
 		{
@@ -305,6 +312,7 @@ namespace uft::Tools
 						tool->ArchiveName = addExtension(tool->Name, extension);
 						::std::filesystem::rename(temp, path + "/" + *tool->ArchiveName);
 					}
+					ulrm.unlock();
 					Save();
 					return true;
 				}
@@ -318,6 +326,7 @@ namespace uft::Tools
 		{
 			::std::cerr << err.what() << ::std::endl;
 		}
+		ulrm.unlock();
 		Save();
 		return true;
 	}
@@ -352,7 +361,6 @@ namespace uft::Tools
 			}
 			Save();
 		}
-		
 		// The Tool has already been downloaded, return that path
 		if(toolPtr->ArchiveName && ::std::filesystem::exists(toolPath + "/" + *toolPtr->ArchiveName) && !forceDownload)
 			return toolPath + "/" + *toolPtr->ArchiveName;
@@ -390,9 +398,9 @@ namespace uft::Tools
 		return !LocalTools.empty();
 	}
 	
-	::std::vector<Tool> const& ToolHandler::GetAll()
+	::std::deque<Tool> const& ToolHandler::GetAll()
 	{
-		std::vector<Tool*> toolsToProcess;
+		std::list<Tool*> toolsToProcess;
 		{
 			::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);
 			for (auto& tool : LocalTools)

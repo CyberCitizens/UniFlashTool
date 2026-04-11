@@ -128,7 +128,7 @@ namespace uft::Tools
 			// Path to the local repository of tools
 			::std::string LocalRepoPath;
 			// Tools that are already downloaded in this local repo
-			::std::vector<Tool> LocalTools;
+			::std::deque<Tool> LocalTools;
 			// Downloads 
 			bool Download(Tool* tool, ::std::string const& source);
 			// initiates a ToolHandler with a path pointing to the local tools repository.
@@ -159,7 +159,7 @@ namespace uft::Tools
 			// Also downloads it if it's present but not downloaded.
 			::std::optional<Tool*> Get(::std::string const& toolName, bool fetch = true);
 			// Fetches every tool in this repo (updates if not present) and get them on a vector.
-			::std::vector<Tool> const& GetAll();
+			::std::deque<Tool> const& GetAll();
 
 			// Getter for LocalRepoPath.
 			::std::string GetPath() const;

@@ -2,8 +2,8 @@
 
 UniFlash::UniFlash(QWidget* parent) : QWidget(parent)
 {
-	// Tries to start ADB server, fails silently if any error happens.
 	Repos.push_back(::uft::Tools::ToolHandler::GetDefault());
+	// Tries to start ADB server, fails silently if any error happens.
 	::uft::Tools::Flash::EnsureADB();
 	setupUI();
 }

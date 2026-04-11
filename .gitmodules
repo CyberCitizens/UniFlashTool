@@ -1,9 +1,6 @@
 [submodule "libs/curlpp"]
 	path = libs/curlpp
 	url = https://github.com/jpbarrette/curlpp
-[submodule "libs/libxmlpp"]
-	path = libs/libxmlpp
-	url = https://github.com/libxmlplusplus/libxmlplusplus
-[submodule "libs/libxml2"]
-	path = libs/libxml2
-	url = https://github.com/GNOME/libxml2
+[submodule "libs/payload-dumper-go"]
+	path = libs/payload-dumper-go
+	url = https://github.com/ssut/payload-dumper-go
