@@ -2,7 +2,7 @@
 
 namespace uft::Tools
 {
-	Config::Config(ReadOnlyMemory const rom, class Recovery const recovery, bool wipeData) : ROM{rom}, Recovery{recovery}, WipeData{wipeData}
+	Config::Config(ReadOnlyMemory const rom, class Recovery const recovery, bool wipeData) : ROM{rom}, _Recovery{recovery}, WipeData{wipeData}
 	{
 		
 	}
@@ -57,7 +57,7 @@ namespace uft::Tools
 		Flash::FastBoot::WaitForFastBoot(); // Let's wait until device has booted in fastboot mode
 		free(malloc(1024)); // if this fails, the heap is corrupt and no attempt to format the device should be tried.
 		logIfPossible(::uft::qt("Serious shit about to happen, let's flash a recovery image !\n"));
-		if(!Recovery.Flash())
+		if(!_Recovery.Flash())
 		{
 			logIfPossible(::uft::qt("Well, shit happened ! Let's stop it right there, and look at the error.\n"));
 			Flash::FastBoot::Reboot(Flash::PARTITION::SYSTEM);

@@ -7,36 +7,25 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(MSVC)
     # Flags for Windows (MSVC)
     add_compile_options(/W3 /utf-8) 
-    set(CMAKE_CXX_FLAGS_DEBUG "/3d /Zi") # /Od = no optimization, /Zi = debug infos
-    set(CMAKE_CXX_FLAGS_RELEASE "/3d")
+    set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi") # /Od = no optimization, /Zi = debug infos
+    # set(CMAKE_CXX_FLAGS_RELEASE "")
 else()
-    # Flags pour Linux/macOS (GCC/Clang)
-    add_compile_options(-pipe -Wno-unknown-argument)
-    set(CMAKE_CXX_FLAGS_DEBUG "-march=native -O3 -g")
+    # Flags for Linux/macOS (GCC/Clang)
+    add_compile_options(-pipe)
+	set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
+    set(CMAKE_CXX_FLAGS_DEBUG "-march=native -O0 -g ${ASAN_FLAGS}")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -pipe")
+	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
+    set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=address")
+	link_libraries(-fsanitize=address)
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network Gui Concurrent)
-# set(LIBXML2_ROOT "${CMAKE_BINARY_DIR}/_deps/libxml2")
-# add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
-# link_libraries(-fsanitize=address)
-# set(LIBXML2_SOURCE_DIR "${CMAKE_SOURCE_DIR}/libs/libxml2")
-# set(LIBXML2_BUILD_DIR  "${CMAKE_BINARY_DIR}/_deps/libxml2-build")
-# set(LIBXML2_INSTALL_DIR  "${CMAKE_BINARY_DIR}/_deps/libxml2-install")
-
 include(FetchContent)
 
-# FetchContent_Declare(
-#     libxml2
-#     SOURCE_DIR ${LIBXML2_SOURCE_DIR}
-# )
-
-# FetchContent_MakeAvailable(libxml2)
-
-# find_package(LibXml2 REQUIRED)
 find_package(LibArchive REQUIRED)
 
 if(TARGET LibArchive::LibArchive)
@@ -72,17 +61,16 @@ set_target_properties(uniflashtool PROPERTIES
     MACOSX_BUNDLE_BUNDLE_NAME "uniflashtool"
 )
 add_subdirectory(libs/curlpp)
-
+add_subdirectory(libs/pugixml)
 
 target_include_directories(uniflashtool PRIVATE
-	"${LIBXML2_INCLUDE_DIR}"
+	curlpp
+	pugixml
 )
-
-target_compile_options(uniflashtool PRIVATE -w)
 
 target_link_libraries(uniflashtool PRIVATE 
 	curlpp
-#	${LIBXML2_LIBRARIES}
+	pugixml
     Qt6::Core 
     Qt6::Widgets 
     Qt6::Network

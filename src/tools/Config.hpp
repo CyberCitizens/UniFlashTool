@@ -22,7 +22,7 @@ namespace uft::Tools
 		// Custom ROM to install
 		ReadOnlyMemory const ROM;
 		// Recovery tool
-		Recovery const Recovery;
+		Recovery const _Recovery;
 		bool const WipeData = false;
 		::std::string const TargetDevice = ROM.GetTargetDevice();
 		signals:

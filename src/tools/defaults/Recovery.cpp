@@ -31,6 +31,26 @@ namespace uft::Tools
 		return OrangeFox;
 	}
 
+	Recovery Recovery::PitchBlack(::std::string const& _deviceCodename)
+	{
+		Recovery PitchBlack;
+		::std::string const url = repository::SourceForge::GetURLFromProjectName(
+			"pbrp"
+		);
+		::std::string const rss = HttpGet(
+			repository::SourceForge::GetRSSForURL(
+				url, "/" + _deviceCodename
+			)
+		);
+		PitchBlack.TargetDevice = _deviceCodename;
+		PitchBlack.SourceType = SOURCE_TYPE::ARCHIVE;
+		PitchBlack.Type = TOOL_TYPE::RECOVERY;
+		PitchBlack.Name = "PitchBlack Recovery for " + _deviceCodename;
+		PitchBlack.Source = repository::SourceForge::LastReleaseUri(rss);
+
+		return PitchBlack;
+	}
+
 	::std::optional<::std::string> Recovery::GetImageFromArchive() const
 	{
 		auto toolPath = Origin->GetToolPath(*this); // Ensures the tool is downloaded

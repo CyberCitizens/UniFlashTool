@@ -4,3 +4,6 @@
 [submodule "libs/payload-dumper-go"]
 	path = libs/payload-dumper-go
 	url = https://github.com/ssut/payload-dumper-go
+[submodule "libs/pugixml"]
+	path = libs/pugixml
+	url = https://github.com/zeux/pugixml

@@ -3,6 +3,7 @@
 
 #include "../tools.h"
 #include "../flash.h"
+#include "../sourceforge/SourceForgeHandler.hpp"
 
 #include <qtextedit.h>
 #include <qmessagebox.h>
@@ -18,7 +19,9 @@ namespace uft::Tools
 		Recovery() : Tool{} {}
 		Recovery(Tool source);
 		// Look for a compatible OrangeFox version for the given device.
-		static Recovery OrangeFox(::std::string const& _deviceCodeName);
+		static Recovery OrangeFox(::std::string const& _deviceCodename);
+		// Look for a comaptible version of PitchBlack Recovery Project for the given device.
+		static Recovery PitchBlack(::std::string const& _deviceCodename);
 		// Look for a compatible TWRP version for the given device. Will be supported in the future
 		// static Recovery const TWRP(::std::string const& _deviceCodeName, ::std::string const& version="");
 		

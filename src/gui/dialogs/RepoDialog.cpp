@@ -122,7 +122,7 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 		currentRepo->Save();
 		RefreshRepoList();
 	});
-	connect(getRecommendedForMyDevice, &QPushButton::clicked, this, [this] -> void
+	connect(getRecommendedForMyDevice, &QPushButton::clicked, this, [this]() -> void
 	{
 		if(!::uft::Tools::Flash::HasDevice())
 		{
@@ -133,7 +133,7 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 		}
 		auto response = QMessageBox::information(this,
 			::uft::qt("Getting recommanded tools"),
-			::uft::qt("This will download the latest version of LineageOS and of OrangeFox Recovery for your device. Do you agree ?\nThis procedure can freeze UniFlashTool for several minutes depending on your network strength."),
+			::uft::qt("This will download the latest version of LineageOS and of PitchBlack Recovery for your device. Do you agree ?\nThis procedure can freeze UniFlashTool for several minutes depending on your network strength."),
 			QMessageBox::StandardButton::Ok,
 			QMessageBox::StandardButton::Cancel
 		);
@@ -145,27 +145,39 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 			return;
 		}
 		::std::string const codename = uft::Tools::Flash::GetConnectedDeviceCodename();
+
+		if(!::uft::Platform::CheckForCommandExecution(codename))
+		{
+			QMessageBox::warning(this, ::uft::qt("Getting recommended tools"),
+				::uft::qt("No device is currently connected. Please connect an Android device with USB debugging enabled to perform this action.")
+			);
+			return;
+		}
 		// Actual download
 		QThread
-			*ofox		 = new QThread,
+			*reco		 = new QThread,
 			*lineage	 = new QThread;
 
 		
 
-		connect(ofox, &QThread::started, [this, codename]
+		connect(reco, &QThread::started, [this, codename]
 		{
+			if(!::uft::Platform::CheckForCommandExecution(codename))
+				return;
 			uft::Tools::ToolHandler::GetDefault()
-				->AddTool(uft::Tools::Recovery::OrangeFox(codename));
+				->AddTool(uft::Tools::Recovery::PitchBlack(codename));
 			QMetaObject::invokeMethod(this, "RefreshRepoList", Qt::QueuedConnection);
 		});
 
 		connect(lineage, &QThread::started, [this, codename]
 		{
+			if(!::uft::Platform::CheckForCommandExecution(codename))
+				return;
 			auto rom = uft::Tools::ReadOnlyMemory::Lineage(codename);
 			QMetaObject::invokeMethod(this, "RefreshRepoList", Qt::QueuedConnection);
 		});
 
-		for(auto& thread : { ofox, lineage })
+		for(auto& thread : { reco, lineage })
 		{
 			connect(thread, &QThread::finished, &QThread::deleteLater);
 			thread->start();
@@ -240,7 +252,7 @@ void RepoDialog::RefreshToolView()
 	if(currentTool->SourceType)
 		toolSourceType->setCurrentIndex(*currentTool->SourceType);
 	disconnect(removeTool, &QPushButton::clicked, 0, 0);
-	connect(removeTool, &QPushButton::clicked, this, [this] -> void
+	connect(removeTool, &QPushButton::clicked, this, [this]() -> void
 	{
 		::uft::Tools::Tool tool = GetToolFromList();
 		if(!currentTool || tool.Name.empty())
