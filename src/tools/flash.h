@@ -76,6 +76,22 @@ namespace uft::Tools::Flash
 	::std::string const EnsureADB();
 	// Loads a .zip into a phone.
 	::std::string const Sideload(::std::string const& filePath, QTextEdit* log = 0);
+	// Installs an app.
+	::std::string const Install(::std::string const& appPath);
+	// Pushes data on the phone on a given directory.
+	::std::string const Push(::std::string const& source, ::std::string const& destination);
+	// Enters a command in the ADB shell as the device's user.
+	::std::string const Shell(::std::string const& command);
+	// Alias to fasten the de-googlisation process
+	// Runs wipe-frp to remove any remaining trace of Google on the device,
+	// preventing app installation and password setting.
+	inline ::std::string const UnGoogle()
+	{
+		WaitForState(STATE_RECOVERY);
+		return Shell("wipe-frp");
+	}
+	// Looks for a program in the device, returns its path if it's present
+	::std::string const Which(::std::string const& program);
 	namespace FastBoot
 	{
 		void WaitForFastBoot(); // Waits until the device is in fastboot mode.

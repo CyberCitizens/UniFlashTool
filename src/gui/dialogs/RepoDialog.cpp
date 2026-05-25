@@ -8,6 +8,7 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 	QPushButton *addRepo		= new QPushButton(uft::qt("Add local repository"));
 	QPushButton *addTool		= new QPushButton(uft::qt("Add tool to current repository"));
 	QPushButton *getRecommendedForMyDevice = new QPushButton(::uft::qt("Get recommended tools for my device"));
+	QPushButton *getRootingTools = new QPushButton(::uft::qt("Get recommended rooting tools"));
 
 	QPushButton	*addGithubTool	= new QPushButton(::uft::qt("Add a tool from GitHub"));
 
@@ -33,6 +34,7 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 		(new LabeledWidget(::uft::t<::std::string>("Tool to edit"), toolList))
 			->setSpacer(LabeledWidget::RIGHT),
 		(new LayoutElement(getRecommendedForMyDevice))->setSpacer(LayoutElement::RIGHT),
+		(new LayoutElement(getRootingTools))->setSpacer(LayoutElement::RIGHT),
 		(new LayoutElement(addGithubTool))->setSpacer(LayoutElement::RIGHT),
 		(new LayoutElement(addTool))->setSpacer(LayoutElement::RIGHT),
 		(new LayoutElement(addRepo))->setSpacer(LayoutElement::RIGHT)
@@ -183,6 +185,32 @@ RepoDialog::RepoDialog(::std::vector<::uft::Tools::ToolHandler*>& repos, QWidget
 			thread->start();
 		}
 		
+	});
+
+	connect(getRootingTools, &QPushButton::clicked, this, [this]() -> void
+	{
+		QThread *rootDownload = new QThread;
+		connect(rootDownload, &QThread::started, [this]() -> void
+		{
+			auto stealth = ::uft::Tools::Stealth::StealthTools();
+			stealth.emplace_back(::uft::Tools::Tool{
+				.Name		= "Magisk",
+				.Type		= ::uft::Tools::ROOT,
+				.SourceType	= ::uft::Tools::GITHUB_REPO,
+				.Source		= ::uft::Tools::GitHub::MakeUrlFromInfo(
+					"topjohnwu",
+					"Magisk",
+					"Magisk"
+				)
+			});
+			if(currentRepo)
+				for(auto const& tool : stealth)
+					currentRepo->AddTool(tool);
+			
+		});
+
+		connect(rootDownload, &QThread::finished, &QThread::deleteLater);
+		rootDownload->start();
 	});
 
 	// RefreshRepoList();

@@ -59,7 +59,10 @@ namespace uft
 	template ::std::string const& t<::std::string const&>(::std::string const& string);
 	template<> inline char const * const& t<char const* const&>(::std::string const& string)
 	{
-		return t<::std::string>(string).c_str();
+		::std::string _s = t<::std::string>(string);
+		char const* buffer = new char const[string.size()]();
+		::std::memcpy((void*)buffer, (void*)_s.data(), sizeof(char) * _s.size());
+		return buffer;
 	}
 
 	inline ::std::string st(::std::string const& string)

@@ -11,6 +11,7 @@
 #include <qmessagebox.h>
 #include <qlineedit.h>
 #include "../elements/LabeledWidget.hpp"
+#include "../../tools/stealth/Stealth.hpp"
 
 class GitHubTool : public QDialog
 {

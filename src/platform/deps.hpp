@@ -81,6 +81,8 @@ namespace uft::Platform
 	bool InstallAndroidTools();
 	// Returns true if no error has been found in output.
 	bool CheckForCommandExecution(::std::string const& output);
+	// Just an alias for CheckForCommandExecution
+	inline bool Check(::std::string const& output) { return CheckForCommandExecution(output); };
 	// Returns true if the user is in the given group.
 	bool IsUserInGroup(::std::string const& group);
 	

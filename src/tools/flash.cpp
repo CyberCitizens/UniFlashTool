@@ -73,6 +73,32 @@ namespace uft::Tools::Flash
 		return ::uft::st("Provided resource is either a directory or not an archive file.") + UFT_ERROR_TAG;
 	}
 
+	::std::string const Install(::std::string const& appPath)
+	{
+		if(!::std::filesystem::exists(appPath))
+			return "The specified path does not exist on the host filesystem." + ::std::string(UFT_ERROR_TAG);
+		WaitForState(STATE_DEVICE);
+		return Platform::RunCommand("adb", { "install", appPath.c_str() });
+	}
+
+	::std::string const Push(::std::string const& source, ::std::string const& destination)
+	{
+		if(!::std::filesystem::exists(source))
+			return "The specified path does not exist on the host filesystem." + ::std::string(UFT_ERROR_TAG);
+		WaitForState(STATE_DEVICE);
+		return Platform::RunCommand("adb", { "push", source.c_str(), destination.c_str() });
+	}
+
+	::std::string const Shell(::std::string const& command)
+	{
+		return Platform::RunCommand("adb", { "shell", command.c_str() });
+	}
+
+	::std::string const Which(::std::string const& program)
+	{
+		WaitForState(STATE_DEVICE);
+		return Shell("which " + program);
+	}
 
 	bool FastBoot::HasDevice()
 	{

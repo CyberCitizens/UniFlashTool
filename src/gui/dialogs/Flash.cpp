@@ -69,7 +69,7 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 			toolList->addItem(QString::fromStdString(tool.Name));
 	};
 
-	auto getToolFromSelected = [ repoList, toolList ] -> Tool*
+	auto getToolFromSelected = [ repoList, toolList ]() -> Tool*
 	{
 		::uft::Tools::ToolHandler* repo = ::uft::Tools::ToolHandler::GetOrCreateRepo(
 			repoList->currentText().toStdString()
@@ -86,16 +86,17 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 		return *toolPtr;
 	};
 
-	auto getToolByType = [ configToolset ](TOOL_TYPE type) -> ::std::optional<Tool>
+	auto getToolByType = [ configToolset ](TOOL_TYPE type) -> ::std::deque<Tool>
 	{
+		::std::deque<Tool> tools;
 		for(int i = 0; i < configToolset->count(); ++i)
 		{
 			QListWidgetItem* item = configToolset->item(i);
 			Tool currentTool = dynamic_cast<ToolWidget*>(configToolset->itemWidget(item))->GetTool();
 			if(currentTool.Type == type)
-				return currentTool;
+				tools.emplace_back(currentTool);
 		}
-		return ::std::nullopt;
+		return tools;
 	};
 
 	connect(repoList, &QComboBox::currentIndexChanged, refreshToolList);
@@ -125,7 +126,7 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 		configToolset->setItemWidget(container, tw);
 	});
 	connect(removeToolFromConfig, &QPushButton::clicked, this,
-	[repoList, toolList, configToolset] -> void {
+	[repoList, toolList, configToolset]() -> void {
 		if(configToolset->selectedItems().empty())
 			return;
 		for(QListWidgetItem* container : configToolset->selectedItems())
@@ -138,7 +139,7 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 		}
 	});
 	connect(flash, &QPushButton::clicked, this,
-		[this, log, getToolByType, configToolset, formatWipeData] -> void
+		[this, log, getToolByType, configToolset, formatWipeData]() -> void
 		{
 			if(!Flash::FastBoot::HasDevice())
 			{
@@ -154,7 +155,7 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 			for(auto _tool : {
 				rom, dtbo, boot, recovery
 			})
-				if(!_tool)
+				if(_tool.empty())
 				{
 					QMessageBox::warning(this, ::uft::qt("Flash info"), ::uft::qt(
 						"One or more tools are missing from the final configuration."
@@ -177,22 +178,23 @@ FlashDialog::FlashDialog(QWidget* parent) : QDialog(parent)
 			}
 			
 			auto root = getToolByType(TOOL_TYPE::ROOT);
-			auto pif = getToolByType(TOOL_TYPE::INTEGRITY);
+			auto modules = getToolByType(TOOL_TYPE::MODULE);
 
 			ReadOnlyMemory system{
-				*rom,
-				*dtbo,
-				*boot
+				rom.front(),
+				dtbo.front(),
+				boot.front()
 			};
 
-			if(root)
-				system.SetRoot(*root);
-			if(pif)
-				system.SetPlayIntegrityFix(*pif);
+			if(!root.empty())
+				system.SetRoot(root.front());
+			if(!modules.empty())
+				for(auto const& _module : modules)
+					system.AddRootModule(_module);
 			
 			auto* _Config = new ::uft::Tools::Config {
 				system,
-				Recovery{*recovery},
+				Recovery{recovery.front()},
 				formatWipeData->isChecked(),
 			};
 			QThread* worker = new QThread;

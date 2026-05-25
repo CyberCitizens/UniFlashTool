@@ -31,6 +31,10 @@ namespace uft::Tools
 		public:
 		Config(ReadOnlyMemory const rom, class Recovery const recovery, bool wipeData = false);
 		bool Flash();
+		bool isRoot() const
+		{
+			return ROM.isRoot();
+		}
 	} ;
 }
 

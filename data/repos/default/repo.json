@@ -1,15 +1,7 @@
 {
 	"repo_path": "data/repos/default",
-	"timestamp": 1776465260,
+	"timestamp": 1776490045,
 	"tools": [
-		{
-			"archive_name": "PBRP-sweet-4.0-20230917-1245-OFFICIAL.zip?viasf=1.zip",
-			"name": "PitchBlack Recovery for sweet",
-			"source": "https://sourceforge.net/projects/pbrp/files/sweet/PBRP-sweet-4.0-20230917-1245-OFFICIAL.zip/download",
-			"source_type": 1,
-			"target_device": "sweet",
-			"type": 2
-		},
 		{
 			"archive_name": "dtbo.img",
 			"name": "LineageOS's DTBO for sweet",
@@ -17,6 +9,14 @@
 			"source_type": 3,
 			"target_device": "sweet",
 			"type": 0
+		},
+		{
+			"archive_name": "PBRP-sweet-4.0-20230917-1245-OFFICIAL.zip?viasf=1.zip",
+			"name": "PitchBlack Recovery for sweet",
+			"source": "https://sourceforge.net/projects/pbrp/files/sweet/PBRP-sweet-4.0-20230917-1245-OFFICIAL.zip/download",
+			"source_type": 1,
+			"target_device": "sweet",
+			"type": 2
 		},
 		{
 			"archive_name": "boot.img",
@@ -35,12 +35,32 @@
 			"type": 3
 		},
 		{
-			"archive_name": "Magisk-v30.7.apk",
+			"archive_name": "PlayIntegrityFix.zip",
+			"name": "PlayIntegrityFix",
+			"source": "https://github.com/KOWX712/PlayIntegrityFix/releases/download/v4.5-inject-s/PlayIntegrityFix_v4.5-inject-s.zip",
+			"source_type": 0,
+			"type": 5
+		},
+		{
+			"archive_name": "Shamiko.zip",
+			"name": "Shamiko",
+			"source": "https://github.com/LSPosed/LSPosed.github.io/releases/download/shamiko-414/Shamiko-v1.2.5-414-release.zip",
+			"source_type": 0,
+			"type": 5
+		},
+		{
+			"archive_name": "PlaycurlNEXT.zip",
+			"name": "PlaycurlNEXT",
+			"source": "https://github.com/daboynb/playcurlNEXT/releases/download/v1.19/playcurlNEXT.zip",
+			"source_type": 0,
+			"type": 5
+		},
+		{
+			"archive_name": "Magisk.zip",
 			"name": "Magisk",
 			"source": "https://github.com/topjohnwu/Magisk/releases/download/v30.7/Magisk-v30.7.apk",
 			"source_type": 0,
-			"type": 4,
-			"version": ""
+			"type": 4
 		}
 	]
 }

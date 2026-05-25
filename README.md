@@ -6,7 +6,7 @@ Universal GUI used to flash any phone with a custom ROM.
 
 First of all; because I can.
 
-Second of all; doing a video about flashing phones, I came accross the fact that flashing phones may not be a hard thing to do in the end; still, typing commands in a terminal can rebuke most of genuine users looking for more privacy and control over their phones.
+Second of all; doing a video about flashing phones, I came accross the fact that flashing phones may not be a hard thing to do in the end; still, typing commands in a terminal can discourage most of genuine users looking for more privacy and control over their phones.
 
 As a tenet, I wanted to keep things transparent and secure. That's why this project is open source.
 

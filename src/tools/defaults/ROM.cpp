@@ -79,8 +79,10 @@ namespace uft::Tools
 			case TOOL_TYPE::ROM:
 				ROM = tool;
 				return this;
-			case TOOL_TYPE::INTEGRITY:
-				PlayIntegrityFix = tool;
+			case TOOL_TYPE::MODULE:
+				if(!RootModules)
+					RootModules = ::std::deque<Tool>();
+				RootModules->emplace_back(tool);
 				return this;
 			case TOOL_TYPE::ROOT:
 				Root = tool;
@@ -153,7 +155,7 @@ namespace uft::Tools
 		bool success = true;
 		for(auto const& tool : {
 			Root,
-			PlayIntegrityFix,
+			// PlayIntegrityFix, // this shit will be installed, not sideloaded
 		})
 		{
 			if(!tool)
@@ -167,6 +169,30 @@ namespace uft::Tools
 			))
 				success = false;
 		}
+		return success;
+	}
+
+	bool ReadOnlyMemory::PostInstall() const
+	{
+		bool success = true;
+		if(RootModules && isRoot())
+			for(auto const& module : *RootModules)
+			{
+				Flash::WaitForState(Flash::STATE_DEVICE);
+				auto modulePath = module.GetFileName();
+				if(!modulePath)
+				{
+					success = false;
+					continue;
+				}
+				success = success && Platform::Check(
+					Flash::Push(
+						*modulePath,
+						MAGISK_MODULES_PATH + "/" + module.Name
+					));
+			}
+		// future support for post-install apps here
+
 		return success;
 	}
 

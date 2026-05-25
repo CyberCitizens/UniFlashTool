@@ -40,7 +40,8 @@ namespace uft::Tools
 		);
 		
 	}
-
+	::std::string const MAGISK_MODULES_PATH = "/sdcard/modules";
+	
 	::std::string const HttpGet(::std::string const& url);
 	
 	// Helps categorizing tool's type
@@ -51,7 +52,8 @@ namespace uft::Tools
 		RECOVERY,		// Like OrangeFox or TWRP
 		ROM,			// Like LineageOS.zip
 		ROOT,			// Like Magisk.apk
-		INTEGRITY,		// Like PlayIntegrityFix.apk
+		MODULE,			// Like PlayIntegrityFix.zip, Shamiko, etc.
+		APP,			// Any apk to install on the target device once it's ready and booted.
 	};
 
 	::std::map<TOOL_TYPE, ::std::string> const TOOL_TYPES
@@ -61,7 +63,8 @@ namespace uft::Tools
 		{ RECOVERY,		::uft::t<::std::string>("Recovery") },
 		{ ROM,			::uft::t<::std::string>("ROM") },
 		{ ROOT,			::uft::t<::std::string>("Rooting tool") },
-		{ INTEGRITY,	::uft::t<::std::string>("Integrity fix") },
+		{ MODULE,		::uft::t<::std::string>("Rooting module") },
+		{ APP,			::uft::t<::std::string>("Application") },
 	};
 	
 	// Categorizes source type

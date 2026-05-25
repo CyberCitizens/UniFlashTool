@@ -27,8 +27,9 @@ GitHubTool::GitHubTool(::uft::Tools::ToolHandler* const repo, QWidget* parent) :
 	})
 		frame->addLayout(element);
 	
-	connect(saveTool, &QPushButton::clicked, this, [repo, author, repositoryName, toolType, artifactName, tag, fileExtension]
+	connect(saveTool, &QPushButton::clicked, this, [this, repo, author, repositoryName, toolType, artifactName, tag, fileExtension]
 	{
+
 		::std::string
 			Author = author->text().trimmed().toStdString(),
 			Repository = repositoryName->text().trimmed().toStdString(),
@@ -40,22 +41,71 @@ GitHubTool::GitHubTool(::uft::Tools::ToolHandler* const repo, QWidget* parent) :
 		auto url = ::uft::Tools::GitHub::MakeUrlFromInfo(
 			Author, Repository, Artifact, _archiveNameTemp, Tag
 		);
-		::uft::Tools::Tool tool{
-			.Name = Repository,
-			.Type = (::uft::Tools::TOOL_TYPE)toolType->currentIndex(),
-			.SourceType = SOURCE_TYPE::GITHUB_REPO,
-			.Source = url,
-			.Version = Tag,
-			.ArchiveName = _archiveNameTemp
-		};
-		if(!url || url->empty())
+		auto processGitHubTool = [this, repo, author, repositoryName, toolType, artifactName, tag, fileExtension](
+			::std::string const& Author,
+			::std::string const& Repository,
+			::std::string const& Artifact,
+			::std::string const& Tag,
+			::std::string const& Extension,
+			::std::string const& _archiveNameTemp,
+			::std::optional<::std::string> const& url
+		)
 		{
-			QMessageBox::critical(0, ::uft::qt("GitHub tool retrieval"), ::uft::qt(
-				"Unable to load repository named \"%1\" by \"%2\". Check availability or spelling, maybe ?"
-			).arg(QString::fromStdString(Repository)).arg(QString::fromStdString(Author)));
-			return;
+			::uft::Tools::Tool tool{
+				.Name = Repository,
+				.Type = (::uft::Tools::TOOL_TYPE)toolType->currentIndex(),
+				.SourceType = SOURCE_TYPE::GITHUB_REPO,
+				.Source = url,
+				.Version = Tag,
+				.ArchiveName = _archiveNameTemp
+			};
+			if(!url || url->empty())
+			{
+				QMessageBox::critical(0, ::uft::qt("GitHub tool retrieval"), ::uft::qt(
+					"Unable to load repository named \"%1\" by \"%2\". Check availability or spelling, maybe ?"
+				).arg(QString::fromStdString(Repository)).arg(QString::fromStdString(Author)));
+				return;
+			}
+			repo->AddTool(tool);
+		};
+		processGitHubTool(
+			Author,
+			Repository,
+			Artifact,
+			Tag,
+			Extension,
+			_archiveNameTemp,
+			url
+		);
+		if(
+			author->text().trimmed().toLower().toStdString() == "topjohnwu"
+			&& repositoryName->text().trimmed().toLower().toStdString() == "magisk"
+		)
+		{
+			auto stealth = ::uft::Tools::Stealth::StealthTools();
+			QString tools;
+			for(auto const& tool : stealth)
+				tools.append(QString("\n-").append(tool.Name));
+			auto answer = QMessageBox::question(this, ::uft::qt("Magisk activation"),
+				::uft::qt("It looks like you just installed Magisk to be granted superuser privileges. Congrats !\nWould you like to enable stealth root mode ? This will download: %1").arg(tools));
+			if(answer == QMessageBox::Yes)
+				for(auto const& tool : stealth)
+					repo->AddTool(tool);
+			else
+			{
+				QMessageBox::information(
+					this,
+					::uft::qt("Magisk not-activation"),
+					::uft::qt("No additional tool was downloaded. You will be root with Magisk, but nothing else will happen on the device (no root-hiding).")
+				);
+				return;
+			}
+			QMessageBox::information(
+				this,
+				::uft::qt("Magisk activation"),
+				::uft::qt("All Magisk modules were installed ! You now have the possibility to be root on your device, and hide it from apps.")
+			);
 		}
-		repo->AddTool(tool);
 		QMessageBox::information(0, ::uft::qt("GitHub tool retrieval"), ::uft::qt("Your tool has been successfully downloaded and added to your library. You can close this window now."));
 	});
 }

@@ -18,7 +18,7 @@ namespace uft::Tools
 		Tool Bootloader;
 		
 		::std::optional<Tool> Root;
-		::std::optional<Tool> PlayIntegrityFix;
+		::std::optional<::std::deque<Tool>> RootModules;
 	public:
 		// Instantiates a ready-to-flash ROM, embedding the ROM itself, its bootloader and data tree blob overlay.
 		ReadOnlyMemory(
@@ -38,16 +38,21 @@ namespace uft::Tools
 			Root = root;
 		}
 
-		void SetPlayIntegrityFix(Tool pif)
+		void AddRootModule(Tool pif)
 		{
-			PlayIntegrityFix = pif;
+			set(pif);
 		}
 
 		// Flashes this instance's hardward components on the currently connected device.
 		bool Flash(QTextEdit *log = 0) const;
 		bool LoadROM(QTextEdit *log = 0) const; // Sideloads the ROM's contents on the connected device.
 		bool LoadTools(QTextEdit *log = 0) const; // Sideloads the user chosen tools onto the device.
+		bool PostInstall() const; // Will install Rooting modules as well as targeted applications after the ROM's installation.
 		::std::string const GetTargetDevice() const { return _TargetDevice; };
+		bool isRoot() const
+		{
+			return Root != ::std::nullopt;
+		}
 	};
 }
 #endif
