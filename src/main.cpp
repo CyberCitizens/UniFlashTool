@@ -19,7 +19,6 @@ void testConfig()
 
 int main(int argc, char *argv[]) {
 	curlpp::initialize();
-	testConfig();
 	QApplication app(argc, argv);
 	UniFlash window;
 	window.show();
