@@ -12,7 +12,8 @@
 #include <format>
 #include <map>
 #include <deque>
-#include "../gui/Translate.hpp"
+#include <shared_mutex>
+#include "../platform/deps.hpp"
 
 namespace uft::Tools
 {
@@ -58,13 +59,13 @@ namespace uft::Tools
 
 	::std::map<TOOL_TYPE, ::std::string> const TOOL_TYPES
 	{
-		{ DTBO,			::uft::t<::std::string>("Data Tree Blob for Overlay image (DTBO)") },
-		{ BOOT,			::uft::t<::std::string>("Boot image") },
-		{ RECOVERY,		::uft::t<::std::string>("Recovery") },
-		{ ROM,			::uft::t<::std::string>("ROM") },
-		{ ROOT,			::uft::t<::std::string>("Rooting tool") },
-		{ MODULE,		::uft::t<::std::string>("Rooting module") },
-		{ APP,			::uft::t<::std::string>("Application") },
+		{ DTBO,			::std::string("Data Tree Blob for Overlay image (DTBO)") },
+		{ BOOT,			::std::string("Boot image") },
+		{ RECOVERY,		::std::string("Recovery") },
+		{ ROM,			::std::string("ROM") },
+		{ ROOT,			::std::string("Rooting tool") },
+		{ MODULE,		::std::string("Rooting module") },
+		{ APP,			::std::string("Application") },
 	};
 	
 	// Categorizes source type
@@ -78,10 +79,10 @@ namespace uft::Tools
 
 	::std::map<SOURCE_TYPE, ::std::string> const SOURCE_TYPES
 	{
-		{ GITHUB_REPO,		::uft::t<::std::string>("GitHub Repository") },
-		{ ARCHIVE,			::uft::t<::std::string>("Archive") },
-		{ ANDROID_ARCHIVE,	::uft::t<::std::string>("Android Archive") },
-		{ IMAGE,			::uft::t<::std::string>("Image Archive")	},
+		{ GITHUB_REPO,		::std::string("GitHub Repository") },
+		{ ARCHIVE,			::std::string("Archive") },
+		{ ANDROID_ARCHIVE,	::std::string("Android Archive") },
+		{ IMAGE,			::std::string("Image Archive")	},
 	};
 
 	::std::string const HttpGet(::std::string const& url);

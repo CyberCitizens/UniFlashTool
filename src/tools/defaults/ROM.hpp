@@ -44,9 +44,9 @@ namespace uft::Tools
 		}
 
 		// Flashes this instance's hardward components on the currently connected device.
-		bool Flash(QTextEdit *log = 0) const;
-		bool LoadROM(QTextEdit *log = 0) const; // Sideloads the ROM's contents on the connected device.
-		bool LoadTools(QTextEdit *log = 0) const; // Sideloads the user chosen tools onto the device.
+		bool Flash(::uft::on_write_function onWrite = nullptr) const;
+		bool LoadROM(::uft::on_write_function onWrite = nullptr) const; // Sideloads the ROM's contents on the connected device.
+		bool LoadTools(::uft::on_write_function onWrite = nullptr) const; // Sideloads the user chosen tools onto the device.
 		bool PostInstall() const; // Will install Rooting modules as well as targeted applications after the ROM's installation.
 		::std::string const GetTargetDevice() const { return _TargetDevice; };
 		bool isRoot() const

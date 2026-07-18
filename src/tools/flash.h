@@ -7,6 +7,8 @@
 #include "../platform/deps.hpp"
 #include "tools.h"
 
+#include <filesystem>
+
 // This file provides a useful range of functions to easily flash a phone entierely.
 // Basically ADB and FastBoot tools.
 
@@ -73,39 +75,39 @@ namespace uft::Tools::Flash
 	// Reboots a device to its bootloader, enabling fastboot commands.
 	::std::string const RebootToFastBoot();
 	// Ensures ADB is running, starts a new server if no server is connected, and returns the result output.
-	::std::string const EnsureADB();
+	void EnsureADB();
 	// Loads a .zip into a phone.
-	::std::string const Sideload(::std::string const& filePath, QTextEdit* log = 0);
+	Platform::ProcessResult const Sideload(::std::string const& filePath, on_write_function onWrite = nullptr);
 	// Installs an app.
-	::std::string const Install(::std::string const& appPath);
+	Platform::ProcessResult const Install(::std::string const& appPath, on_write_function onWrite = nullptr);
 	// Pushes data on the phone on a given directory.
-	::std::string const Push(::std::string const& source, ::std::string const& destination);
+	Platform::ProcessResult const Push(::std::string const& source, ::std::string const& destination, on_write_function onWrite = nullptr);
 	// Enters a command in the ADB shell as the device's user.
-	::std::string const Shell(::std::string const& command);
+	Platform::ProcessResult const Shell(::std::string const& command, on_write_function onWrite = nullptr);
 	// Alias to fasten the de-googlisation process
 	// Runs wipe-frp to remove any remaining trace of Google on the device,
 	// preventing app installation and password setting.
-	inline ::std::string const UnGoogle()
+	inline Platform::ProcessResult const UnGoogle(on_write_function onWrite = nullptr)
 	{
 		WaitForState(STATE_RECOVERY);
-		return Shell("wipe-frp");
+		return Shell("wipe-frp", onWrite);
 	}
 	// Looks for a program in the device, returns its path if it's present
-	::std::string const Which(::std::string const& program);
+	Platform::ProcessResult const Which(::std::string const& program);
 	namespace FastBoot
 	{
 		void WaitForFastBoot(); // Waits until the device is in fastboot mode.
 		// Returns true if a device is connected with fastboot, false if not.
 		bool HasDevice();
 		// Wipe data on every partition of this device.
-		::std::string const Format(QTextEdit* log = 0);
+		Platform::ProcessResult const Format(on_write_function onWrite = nullptr);
 		// Flashes a file into a given partition, if a device is connected
-		::std::string const Flash(PARTITION const partition, ::std::string const& filename, QTextEdit* log = 0);
+		Platform::ProcessResult const Flash(PARTITION const partition, ::std::string const& filename, on_write_function onWrite = nullptr);
 		// Reboots into a known partition
 		// (leave empty for standard reboot)
-		::std::string const Reboot(PARTITION const partition = SYSTEM);
+		Platform::ProcessResult const Reboot(PARTITION const partition = SYSTEM, on_write_function onWrite = nullptr);
 		// Boots on a file without flashing anything (memory boot, doesn't affect storage data)
-		::std::string const Boot(::std::string const& imagePath);
+		Platform::ProcessResult const Boot(::std::string const& imagePath, on_write_function onWrite = nullptr);
 	}
 }
 

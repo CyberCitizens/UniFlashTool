@@ -1,6 +1,5 @@
 #include "tools.h"
 #include "curlpp/Options.hpp"
-#include <qdebug.h>
 #include <stdexcept>
 
 namespace uft::Tools::GitHub
@@ -369,7 +368,7 @@ namespace uft::Tools
 			if(Download(toolPtr, *tool.Source))
 				return LocalRepoPath + "/" + *toolPtr->ArchiveName;
 		}
-		return ::uft::st("An error occurred while trying to retrieve a referenced tool.");
+		return "An error occurred while trying to retrieve a referenced tool.";
 	}
 
 	::std::optional<Tool*> ToolHandler::Get(::std::string const& toolName, bool fetch)

@@ -1,4 +1,6 @@
 #include "deps.hpp"
+#include "reproc++/reproc.hpp"
+#include <filesystem>
 namespace uft::Platform
 {
 	
@@ -11,6 +13,7 @@ namespace uft::Platform
 		#elif defined(__APPLE__)
 		return PLATFORM::APPLE;
 		#endif
+		return PLATFORM::UNKNOWN_64;
 	}
 	
 	bool EnsureAndroidTools()
@@ -30,111 +33,119 @@ namespace uft::Platform
 
 	bool EnsureTool(::std::string command, ::std::string predicateString)
 	{
-		QStringList parts = QString::fromStdString(command).split(' ', Qt::SkipEmptyParts);
-		if (parts.isEmpty()) return false;
+		::std::deque<::std::string> args = ::std::strsplit(command, ' ');
+		if (args.empty()) return false;
 		
-		QString program = parts.takeFirst();  // "adb" or "fastboot"
-		QStringList args = parts;             // ["version"]
-		
-		QProcess process;
-		process.start(program, args);
-		if (!process.waitForStarted(3000))
-			return false;  // Program not found
-		if (!process.waitForFinished(5000))
-			return false;  // Timeout
-		
-		QString output = process.readAllStandardOutput() + process.readAllStandardError();
-		return output.contains(predicateString.c_str(), Qt::CaseInsensitive);
+		auto programName = args.front();  // "adb" or "fastboot"
+		::reproc::options options;             // ["version"]
+		::reproc::process process;
+		options.redirect.parent = false;
+		args.pop_front();
+		auto pr = RunCommand(programName, args);
+		if(!pr.exitCode)
+			return pr.stdout.find(predicateString.c_str()) != ::std::string::npos;
+		return false;
 	}
 
-	::std::string RunCommand(const std::string& cmd, QStringList const& args, int timeout, QTextEdit* log)
+
+	ProcessResult RunCommand(const std::string& cmd, arglist const& args, int timeout)
 	{
-		QProcess* process = new ::QProcess;
-		::QProcess::connect(process, &QProcess::readyReadStandardOutput, [process, log]() -> void
+		auto programName = cmd;
+		::reproc::options options;
+		::reproc::process process;
+		options.redirect.parent = false;
+		::std::error_code error = process.start(args);
+		if(error)
+			return {
+				.exitCode = error.value(),
+				.stderr = error.message(),
+			};
+		std::string out, err;
+		reproc::sink::string sinkOut(out), sinkErr(err);
+		error = reproc::drain(process, sinkOut, sinkErr);
+		int status = 0;
+		::std::tie(status, error) = process.wait(timeout == -1 ? ::reproc::infinite : ::reproc::milliseconds(timeout));
+		return
 		{
-			if(log && process)
-			{
-				log->append(process->readAllStandardOutput());
-				log->moveCursor(QTextCursor::End);
-			}
-		});
-		::QProcess::connect(process, &QProcess::readyReadStandardOutput, [process, log]() -> void
-		{
-			if(log && process)
-			{
-				log->append(process->readAllStandardOutput());
-				log->moveCursor(QTextCursor::End);
-			}
-		});
-		::QProcess::connect(process, &QProcess::finished, process, &QObject::deleteLater);
-		process->setProcessChannelMode(QProcess::MergedChannels);
-		process->start(QString::fromStdString(cmd), args);
-		try
-		{
-			process->waitForFinished(timeout);
-		} catch(...) {
-			::std::string const errors = process->readAllStandardError().trimmed().toStdString();
-			::std::string const output = process->readAllStandardOutput().trimmed().toStdString();
-			::std::string const final = output + "\n" + UFT_ERROR_TAG + "Errors:\n" + errors;
-			qDebug() << final;
-			::std::cout << final << ::std::endl;
-			return final;
-		}
-		return process->readAllStandardOutput().toStdString();
+			.exitCode = error.value(),
+			.stdout = out,
+			.stderr = err,
+		};
 	}
 
-	::std::string RunCommand(const std::string& cmd, QStringList const& args, int timeout)
+	ProcessResult RunCommand(const std::string& cmd, ::std::function<void(::std::string_view)> onWrite, arglist const& args, int timeout)
 	{
-		QProcess process;
-		
-		process.start(cmd.c_str(), args);
-		try
+		reproc::process process;
+		reproc::options options;
+		auto err = process.start(args, options);
+		if (err) return
 		{
-			process.waitForFinished(timeout);
-		} catch(...) {
-			/* ::std::string const errors = process.readAllStandardError().trimmed().toStdString();
-			::std::string const output = process.readAllStandardOutput().trimmed().toStdString(); */
-			return ::std::string(UFT_ERROR_TAG) + " ERROR "; //output + "\n" +  + "Errors:\n" + errors;
-		}
-		::std::string const errors = process.readAllStandardError().trimmed().toStdString();
-		::std::string const output = process.readAllStandardOutput().trimmed().toStdString();
-		int const exitCode = process.exitCode();
+			.exitCode = err.value(),
+			.stderr = err.message(),
+		};
+		::std::string dummyString;
+		reproc::sink::string dummy(dummyString);
+		std::array<uint8_t, 4096> buffer{};
 
-		if(exitCode == 0)
-		// sometimes they be writing on stderr for some reason. collect both, worst case
-		// errors is empty and an empty newline gets appended to a no-error string.
-			return output + "\n" + errors;
-		::std::string const final = output + "\n" + UFT_ERROR_TAG + "Errors:\n" + errors;
-		qDebug() << final;
-		::std::cout << final << ::std::endl;
-		return output + "\n" + UFT_ERROR_TAG + "Errors:\n" + errors + "\nExit code: " + ::std::to_string(exitCode);
+		while (true) {
+			int bytesRead = 0;
+			std::tie(bytesRead, err) = process.read(
+				reproc::stream::out,
+				buffer.data(), buffer.size()
+			);
+			if (err) return
+			{
+				.exitCode = err.value(),
+				.stderr = err.message(),
+			};
+
+			if(onWrite)
+				onWrite(std::string_view(reinterpret_cast<char*>(buffer.data()), bytesRead));
+		}
+		process.wait(timeout == -1 ? ::reproc::infinite : ::reproc::milliseconds(timeout));
+
 	}
 
 	// if needing to download the archive
 	bool DownloadWindowsTools() {
-		QString binDir = QCoreApplication::applicationDirPath() + "/bin";
-	QDir().mkpath(binDir);
-	
-	std::string zipPath = binDir.toStdString() + "/platform-tools.zip";
-	try {
-		curlpp::Cleanup cleaner;
-		curlpp::Easy request;
+		#ifdef _WIN32
+		// Source - https://stackoverflow.com/a/198099
+		// Posted by Mike, modified by community. See post 'Timeline' for change history
+		// Retrieved 2026-07-18, License - CC BY-SA 4.0
+
+		char pBuf[256];
+		size_t len = sizeof(pBuf);
+
+		int bytes = GetModuleFileName(NULL, pBuf, len);
+		return bytes ? bytes : -1;
+
+
+		::std::string binDir = ::std::string(pBuf) + "/bin";
+		::std::filesystem::create_directories(binDir);
 		
-		request.setOpt(curlpp::options::Url("https://dl.google.com/android/repository/platform-tools-latest-windows.zip"));
-		
-		FILE* file = fopen(zipPath.c_str(), "wb");
-		if (!file) return false;
-		
-		request.setOpt(curlpp::options::WriteFile(file));
-		request.perform();
-		fclose(file);
-		
-		return true;
+		std::string zipPath = binDir + "/platform-tools.zip";
+		try {
+			curlpp::Cleanup cleaner;
+			curlpp::Easy request;
 			
-		} catch (curlpp::RuntimeError& e) {
-			::std::cerr << "Curlpp failed to download Android debug tools: " << e.what() << ::std::endl;
-			return false;
-		}
+			request.setOpt(curlpp::options::Url("https://dl.google.com/android/repository/platform-tools-latest-windows.zip"));
+			
+			FILE* file = fopen(zipPath.c_str(), "wb");
+			if (!file) return false;
+			
+			request.setOpt(curlpp::options::WriteFile(file));
+			request.perform();
+			fclose(file);
+			
+			return true;
+				
+			} catch (curlpp::RuntimeError& e) {
+				::std::cerr << "Curlpp failed to download Android debug tools: " << e.what() << ::std::endl;
+				return false;
+			}
+		#else
+		return false;
+		#endif
 	}
 	
 	bool InstallAndroidTools() {
@@ -146,24 +157,17 @@ namespace uft::Platform
 			break;
 			case PLATFORM::WINDOWS: installCommand = "winget install Google.PlatformTools";
 			break;
+			default: break;
 		}
-		::std::string const exec = RunCommand(installCommand);
+		auto const exec = RunCommand(installCommand);
 
 		if(!CheckForCommandExecution(exec))
 		{
 			// auto install failed, prompt the user to install the tools themselves
-			QMessageBox manualInstall(0);
-			manualInstall.setTextFormat(Qt::TextFormat::RichText);
-			manualInstall.setWindowTitle(uft::qt("Manual installation"));
-			manualInstall.setInformativeText(uft::qt("Auto installation failed. This is usually expected. To install needed tools and proceed, please copy and paste the following command in a terminal:\n\n<pre>%1</pre>").arg(installCommand.c_str()));
-			QPushButton *copy = manualInstall.addButton(uft::qt("Copy command"), QMessageBox::ActionRole);
-			manualInstall.exec();
-
-			if(manualInstall.clickedButton() == copy)
-			{
-				QGuiApplication::clipboard()->setText(installCommand.c_str());
-				QMessageBox :: information(0, uft::qt("Copied text to clipboard"), uft::qt("Successfully copied text to clipboard. Paste it in a terminal as an administrator (or sudo)."));
-			}
+			::uft::renewed::InfoDialog(
+				"Manual installation",
+				::std::string("Auto installation failed. This is usually expected. To install needed tools and proceed, please copy and paste the following command in a terminal:\n\n") + installCommand.c_str()
+			);
 		}
 		return CheckForCommandExecution(exec);
 	}
@@ -173,9 +177,14 @@ namespace uft::Platform
 		return output.find(UFT_ERROR_TAG) == ::std::string::npos;
 	}
 
+	bool CheckForCommandExecution(ProcessResult const& result)
+	{
+		return !result.exitCode;
+	}
+
 	bool IsUserInGroup(::std::string const& group)
 	{
-		::std::string const output = RunCommand("id", { "-n", "-G" });
+		::std::string const output = RunCommand("id", { "-n", "-G" }).stdout;
 		return output.find(group) != ::std::string::npos;
 	}
 
@@ -198,7 +207,7 @@ namespace uft::Platform
 			case ADD_USER_TO_ANDROID_GROUP:
 				return (*commands)["addAndroidGroup"];
 		}
-		return ::uft::st("Error while trying to retrieve the correct command.");
+		return "Error while trying to retrieve the correct command.";
 	}
 
 	LINUX_DISTRIBUTION const GetDistro()

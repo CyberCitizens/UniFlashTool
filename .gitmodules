@@ -7,3 +7,6 @@
 [submodule "libs/pugixml"]
 	path = libs/pugixml
 	url = https://github.com/zeux/pugixml
+[submodule "libs/reproc"]
+	path = libs/reproc
+	url = https://github.com/DaanDeMeyer/reproc

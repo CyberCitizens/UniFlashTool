@@ -96,19 +96,25 @@ namespace uft::Tools
 
 	using namespace ::uft::Tools::Flash::FastBoot;
 
-	bool ReadOnlyMemory::LoadROM(QTextEdit* log) const
+	bool ReadOnlyMemory::LoadROM(::uft::on_write_function onWrite) const
 	{
 		auto toolPath = Origin->GetToolPath(ROM);
 		if(!toolPath)
 			return false;
-		::std::string const commandOutput = Flash::Sideload(*toolPath, log);
+		auto pr = Flash::Sideload(*toolPath);
+		if(pr.exitCode)
+		{
+			::std::cerr << pr.stderr;
+			return false;
+		}
+		::std::string const commandOutput = pr.stdout;
 		bool commandError = Platform::CheckForCommandExecution(commandOutput);
 		if(commandOutput.find("Success") != ::std::string::npos)
 			return true;
 		return commandError;
 	}
 	
-	bool ReadOnlyMemory::Flash(QTextEdit *log) const
+	bool ReadOnlyMemory::Flash(::uft::on_write_function onWrite) const
 	{
 		bool success = true;
 		for(auto const& tool : {
@@ -123,10 +129,26 @@ namespace uft::Tools
 				switch(tool.Type)
 				{
 					case TOOL_TYPE::BOOT:
-						commandOutput = Flash::FastBoot::Flash(Flash::PARTITION::BOOT, *toolPath, log);
+					{
+						auto pr = Flash::FastBoot::Flash(Flash::PARTITION::BOOT, *toolPath);
+						if(pr.exitCode)
+						{
+							::std::cerr << pr.stderr;
+							success = false;
+						}
+						commandOutput = pr.stdout;
+					}
 						break;
 					case TOOL_TYPE::DTBO:
-						commandOutput = Flash::FastBoot::Flash(Flash::PARTITION::DTBO, *toolPath, log);
+					{
+						auto pr = Flash::FastBoot::Flash(Flash::PARTITION::DTBO, *toolPath);
+						if(pr.exitCode)
+						{
+							::std::cerr << pr.stderr;
+							success = false;
+						}
+						commandOutput = pr.stdout;
+					}
 						break;
 					case TOOL_TYPE::RECOVERY:
 						break;
@@ -137,19 +159,17 @@ namespace uft::Tools
 						break; */
 				}
 			if(!Platform::CheckForCommandExecution(commandOutput))
-				QMessageBox::warning(0, ::uft::qt("Error while loading data to device"),
-				::uft::qt("The following error happened while trying to load data to your device: <pre>%1</pre>").arg(QString::fromStdString(commandOutput))
-			);
+				::uft::renewed::WarnDialog("Error while loading data to device",
+				"The following error happened while trying to load data to your device: " + commandOutput);
 		}
 		if(success)
 			return success;
-		QMessageBox::warning(0, ::uft::qt("Information about the flashing procedure"),
-			::uft::qt("One or more components could not be loaded into your device, resulting in an instable state. Please try flashing again as you can soft-brick your phone if you try to boot it normally now.")
-		);
+		::uft::renewed::WarnDialog("Information about the flashing procedure",
+			"One or more components could not be loaded into your device, resulting in an instable state. Please try flashing again as you can soft-brick your phone if you try to boot it normally now.");
 		return success;
 	}
 
-	bool ReadOnlyMemory::LoadTools(QTextEdit *log) const
+	bool ReadOnlyMemory::LoadTools(::uft::on_write_function onWrite) const
 	{
 		Flash::WaitForState(Flash::DEVICE_STATE::STATE_SIDELOAD);
 		bool success = true;
@@ -165,7 +185,7 @@ namespace uft::Tools
 				continue;
 			Flash::WaitForSideload();
 			if(!Platform::CheckForCommandExecution(
-				Flash::Sideload(*toolPath, log)
+				Flash::Sideload(*toolPath)
 			))
 				success = false;
 		}
@@ -185,11 +205,10 @@ namespace uft::Tools
 					success = false;
 					continue;
 				}
-				success = success && Platform::Check(
-					Flash::Push(
+				success = success && !Flash::Push(
 						*modulePath,
 						MAGISK_MODULES_PATH + "/" + module.Name
-					));
+					).exitCode;
 			}
 		// future support for post-install apps here
 

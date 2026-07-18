@@ -56,9 +56,10 @@ namespace uft::Tools
 		auto toolPath = Origin->GetToolPath(*this); // Ensures the tool is downloaded
 		if(!toolPath || !::std::filesystem::exists(*toolPath))
 			return ::std::nullopt;
-		QString targetPath = QString::fromStdString(*toolPath).replace(".zip", ".img");
-		if(::std::filesystem::exists(targetPath.toStdString()))
-			return targetPath.toStdString();
+		// replaces the .zip by a .img
+		::std::string targetPath = (*toolPath).replace((*toolPath).length() - 4, 4, ".img");
+		if(::std::filesystem::exists(targetPath))
+			return targetPath;
 		// At this point, we basically know the tool is downloaded, and is not extracted
 		struct archive* _recovery;
 		_recovery = archive_read_new();
@@ -71,11 +72,11 @@ namespace uft::Tools
 			return ::std::nullopt;
 		// Vibe coded from here to the end of the method, I'm sorry guys
 		while (archive_read_next_header(_recovery, &_recovery_entry) == ARCHIVE_OK) {
-			const char* currentFile = archive_entry_pathname(_recovery_entry);
-			if (QString(currentFile).endsWith(".img"))
+			::std::string currentFile = archive_entry_pathname(_recovery_entry);
+			if (currentFile.ends_with(".img"))
 			{
-				QString targetPath = QString::fromStdString(*toolPath).replace(".zip", ".img");
-				FILE* out = fopen(targetPath.toLocal8Bit().constData(), "wb");
+				::std::string targetPath = (*toolPath).replace((*toolPath).length() - 4, 4, ".img");
+				FILE* out = fopen(targetPath.c_str(), "wb");
 				if (out)
 				{
 					const void* buff;
@@ -87,7 +88,7 @@ namespace uft::Tools
 					fclose(out);
 					
 					archive_read_free(_recovery);
-					return targetPath.toStdString();
+					return targetPath;
 				}
 				else
 					return ::std::nullopt;
@@ -96,14 +97,20 @@ namespace uft::Tools
 		return ::std::nullopt;
 	}
 
-	bool Recovery::Flash(QTextEdit* log) const
+	bool Recovery::Flash() const
 	{
 		if(!ArchiveName || !TargetDevice)
 			return false;
 		::std::optional<::std::string> imagePath = GetImageFromArchive();
 		if(!imagePath)
 			return false;
-		::std::string const output = Tools::Flash::FastBoot::Flash(Flash::PARTITION::RECOVERY, *imagePath, log);
+		auto pr = Tools::Flash::FastBoot::Flash(Flash::PARTITION::RECOVERY, *imagePath);
+		if(pr.exitCode)
+		{
+			::std::cerr << pr.stderr;
+			return false;
+		}
+		::std::string const output = pr.stdout;
 		return ::uft::Platform::CheckForCommandExecution(
 			output
 		);

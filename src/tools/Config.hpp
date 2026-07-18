@@ -1,17 +1,14 @@
 #ifndef UFT_CONFIG
 #define UFT_CONFIG
 
-#include <QObject>
-
 #include "tools.h"
 #include "defaults/ROM.hpp"
 
 
 namespace uft::Tools
 {
-	class Config : public QObject
+	class Config
 	{
-		Q_OBJECT
 		protected:
 		static uint8_t const
 			_RECOVERY	= 1,
@@ -25,12 +22,9 @@ namespace uft::Tools
 		Recovery const _Recovery;
 		bool const WipeData = false;
 		::std::string const TargetDevice = ROM.GetTargetDevice();
-		signals:
-			void statusUpdated(QString message);
-			void requestUserAction(QString title, QString message);
 		public:
 		Config(ReadOnlyMemory const rom, class Recovery const recovery, bool wipeData = false);
-		bool Flash();
+		bool Flash(on_write_function onWrite = nullptr);
 		bool isRoot() const
 		{
 			return ROM.isRoot();

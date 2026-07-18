@@ -14,28 +14,43 @@ namespace uft::Tools::Flash
 	
 	::std::string const GetConnectedDeviceCodename()
 	{
-		::std::string const device = Platform::RunCommand("adb", { "shell", "getprop", "ro.product.device" });
+		auto pr = Platform::RunCommand("adb", { "shell", "getprop", "ro.product.device" });
+		if(pr.exitCode)
+		{
+			// handle error
+			
+		}
+		::std::string const device = pr.stdout;
 		return device.substr(0, device.size() - 1);
 	}
 	
 	bool HasDevice()
 	{
-		::std::string const exec = Platform::RunCommand("adb", { "devices" });
+		auto pr = Platform::RunCommand("adb", { "devices" });
+		if(pr.exitCode)
+			return false;
+		::std::string const exec = pr.stdout;
 		return Platform::CheckForCommandExecution(exec) && exec != "List of devices attached\n";
 	}
 	
 	::std::string const Reboot()
 	{
 		if(!HasDevice())
-			return ::std::string(UFT_ERROR_TAG) + ::uft::st("An error occurred while retrieving devices. Are you connected to your phone ?");
-		return Platform::RunCommand("adb", { "reboot", });
+			return ::std::string(UFT_ERROR_TAG) + ::std::string("An error occurred while retrieving devices. Are you connected to your phone ?");
+		auto pr = Platform::RunCommand("adb", { "reboot", });
+		if(pr.exitCode)
+			return ::std::string(UFT_ERROR_TAG) + "Could not reboot. Error: " + pr.stderr;
+		return pr.stdout;
 	}
 	
 	::std::string const RebootToFastBoot()
 	{
 		if(!HasDevice())
-			return ::std::string(UFT_ERROR_TAG) + ::uft::st("An error occurred while retrieving devices. Are you connected to your phone ?");
-		return Platform::RunCommand("adb", { "reboot", "bootloader", });
+			return ::std::string(UFT_ERROR_TAG) + ::std::string("An error occurred while retrieving devices. Are you connected to your phone ?");
+		auto pr = Platform::RunCommand("adb", { "reboot", "bootloader" });
+		if(pr.exitCode)
+			return ::std::string(UFT_ERROR_TAG) + "Could not reboot. Error: " + pr.stderr;
+		return pr.stdout;
 	}
 
 	void WaitForSideload()
@@ -52,49 +67,51 @@ namespace uft::Tools::Flash
 				return STATE_FASTBOOT;
 			else
 				return STATE_NOT_CONNECTED;
-		
-		::std::string const status = Platform::RunCommand("adb", { "get-state" });
+		auto pr = Platform::RunCommand("adb", { "get-state" });
+		if(pr.exitCode)
+		{
+			::std::cerr << pr.stderr;
+			return DEVICE_STATE::STATE_UNKNOWN;
+		}
+		::std::string const status = pr.stdout;
 		for(auto const& entry : DEVICE_STATES)
 			if(entry.second == status)
 				return entry.first;
 		return STATE_UNKNOWN;
 	}
 
-	::std::string const Sideload(::std::string const& filePath, QTextEdit* log)
+	Platform::ProcessResult const Sideload(::std::string const& filePath, on_write_function onWrite)
 	{
 		if(::std::filesystem::exists(filePath) && !::std::filesystem::is_directory(filePath))
 		{
 			WaitForSideload();
-			if(log)
-				return Platform::RunCommand("adb", { "sideload", filePath.c_str() }, -1, log);
-			else
-				return Platform::RunCommand("adb", { "sideload", filePath.c_str() });
+			return Platform::RunCommand("adb", onWrite, { "sideload", filePath.c_str() });
 		}
-		return ::uft::st("Provided resource is either a directory or not an archive file.") + UFT_ERROR_TAG;
+		return { .exitCode = Platform::ERRORS::INVALID_FILE_TYPE, .stderr = "Provided resource is either a directory or not an archive file." };
 	}
 
-	::std::string const Install(::std::string const& appPath)
+	Platform::ProcessResult const Install(::std::string const& appPath, on_write_function onWrite)
 	{
 		if(!::std::filesystem::exists(appPath))
-			return "The specified path does not exist on the host filesystem." + ::std::string(UFT_ERROR_TAG);
+			return { .exitCode = Platform::ERRORS::FILE_DOES_NOT_EXIST, .stdout = "The specified path does not exist on the host filesystem." };
 		WaitForState(STATE_DEVICE);
-		return Platform::RunCommand("adb", { "install", appPath.c_str() });
+		return Platform::RunCommand("adb", onWrite, { "install", appPath.c_str() });
 	}
 
-	::std::string const Push(::std::string const& source, ::std::string const& destination)
+	Platform::ProcessResult const Push(::std::string const& source, ::std::string const& destination, on_write_function onWrite)
 	{
 		if(!::std::filesystem::exists(source))
-			return "The specified path does not exist on the host filesystem." + ::std::string(UFT_ERROR_TAG);
+			return { .exitCode = Platform::ERRORS::FILE_DOES_NOT_EXIST, .stdout = "The specified path does not exist on the host filesystem." };
 		WaitForState(STATE_DEVICE);
-		return Platform::RunCommand("adb", { "push", source.c_str(), destination.c_str() });
+		return Platform::RunCommand("adb", onWrite, { "push", source.c_str(), destination.c_str() });
 	}
 
-	::std::string const Shell(::std::string const& command)
+	Platform::ProcessResult const Shell(::std::string const& command, on_write_function onWrite)
 	{
-		return Platform::RunCommand("adb", { "shell", command.c_str() });
+		return Platform::RunCommand("adb", onWrite, { "shell", command.c_str() });
 	}
 
-	::std::string const Which(::std::string const& program)
+	Platform::ProcessResult const Which(::std::string const& program)
 	{
 		WaitForState(STATE_DEVICE);
 		return Shell("which " + program);
@@ -102,27 +119,39 @@ namespace uft::Tools::Flash
 
 	bool FastBoot::HasDevice()
 	{
-		::std::string const device = Platform::RunCommand("fastboot", { "devices" });
-		return Platform::CheckForCommandExecution(device) && !device.empty();
+		auto pr = Platform::RunCommand("fastboot", { "devices" });
+		if(pr.exitCode)
+		{
+			::std::cerr << pr.stderr;
+			return false;
+		}
+		::std::string const device = pr.stdout;
+		return !device.empty();
 	}
 
-	::std::string const FastBoot::Format(QTextEdit* log)
+	Platform::ProcessResult const FastBoot::Format(on_write_function onWrite)
 	{
 		::std::string output;
-		auto fastFlash = [&output](QStringList const& args) -> bool
+		auto fastFlash = [&output](::std::deque<::std::string> const& args) -> bool
 		{
-			output += Platform::RunCommand("fastboot", args) + "\n";
-			return Platform::CheckForCommandExecution(output);
+			auto pr = Platform::RunCommand("fastboot", args);
+			output += pr.stdout + "\n";
+			return !pr.exitCode;
 		};
 		if(!FastBoot::HasDevice())
-			return "FastBoot got no device attached and ready. Please try again later." + ::std::string(UFT_ERROR_TAG);
-		for(QStringList const& argList : ::std::initializer_list<QStringList>{
+			return { .exitCode = Platform::ERRORS::NO_DEVICE_ATTACHED, .stderr = "FastBoot got no device attached and ready. Please try again later." };
+		for(::std::deque<::std::string> const& argList : ::std::initializer_list<::std::deque<::std::string>>{
 			{ "-w" },
 			{ "erase", "system" },
 			{ "format:ext4", "userdata" },
 		})
 			if(!fastFlash(argList))
-				return output;
+				return { .exitCode = -1, .stderr = output };
+		return
+		{
+			.exitCode = Platform::ERRORS::NO_ERROR,
+			.stdout = output
+		};
 	}
 
 	void FastBoot::WaitForFastBoot()
@@ -132,53 +161,45 @@ namespace uft::Tools::Flash
 			::std::this_thread::sleep_for(::std::chrono::milliseconds(100));
 	}
 
-	::std::string const FastBoot::Flash(PARTITION const partition, ::std::string const& filename, QTextEdit* log)
+	Platform::ProcessResult const FastBoot::Flash(PARTITION const partition, ::std::string const& filename, on_write_function onWrite)
 	{
 		// prevents flashing on a corrupt or hacky system
 		if(!HasDevice())
-			return ::uft::t<::std::string>("An error happened while detecting connected devices in fastboot mode. ") + UFT_ERROR_TAG;
+			return { .exitCode = Platform::NO_DEVICE_ATTACHED, .stderr = "An error happened while detecting connected devices in fastboot mode. " };
 		if(GetConnectedDeviceState() != STATE_FASTBOOT)
-			return ::uft::st("Device is not ready to perform any flash. Please put the device in Fastboot mode.") + UFT_ERROR_TAG;
+			return { .exitCode = Platform::DEVICE_NOT_READY, .stderr = "Device is not ready to perform any flash. Please put the device in Fastboot mode." };
 		if(!::std::filesystem::exists(filename))
-			return ::uft::st("The file you specified to flash cannot be found ! Error at :") + "\"" + filename + "\"" + UFT_ERROR_TAG;
+			return { .exitCode = Platform::FILE_DOES_NOT_EXIST, .stderr = ::std::string("The file you specified to flash cannot be found ! Error at :") + "\"" + filename + "\"" };
 		::std::string output;
-		if(!log)
-			output = Platform::RunCommand("fastboot", {
-				"flash",
-				QString::fromStdString(PARTITIONS.at(partition)),
-				QString::fromStdString(filename)
-			});
-		else
-			output = Platform::RunCommand("fastboot", {
-				"flash",
-				QString::fromStdString(PARTITIONS.at(partition)),
-				QString::fromStdString(filename)
-			}, -1, log);
-		return output;
+		return Platform::RunCommand("fastboot", onWrite, {
+			"flash",
+			PARTITIONS.at(partition),
+			filename
+		});
 	}
 
-	::std::string const FastBoot::Reboot(PARTITION const partition)
+	Platform::ProcessResult const FastBoot::Reboot(PARTITION const partition, on_write_function onWrite)
 	{
 		if(!HasDevice())
-			return ::uft::t<::std::string>("An error happened while detecting connected devices in fastboot mode.");
-		QStringList args{ "reboot" };
+			return { .exitCode = Platform::ERRORS::NO_DEVICE_ATTACHED, .stderr = "An error happened while detecting connected devices in fastboot mode." };
+		arglist args{ "reboot" };
 		if(partition != SYSTEM)
-			args << QString::fromStdString(PARTITIONS.at(partition));
-		return Platform::RunCommand("fastboot", args);
+			args.push_back(PARTITIONS.at(partition));
+		return Platform::RunCommand("fastboot", onWrite, args);
 	}
 
-	::std::string const FastBoot::Boot(::std::string const& imagePath)
+	Platform::ProcessResult const FastBoot::Boot(::std::string const& imagePath, on_write_function onWrite)
 	{
 		if(!HasDevice())
-			return ::uft::t<::std::string>("An error happened while detecting connected devices in fastboot mode.");
+			return { .exitCode = Platform::ERRORS::NO_DEVICE_ATTACHED, .stderr = "An error happened while detecting connected devices in fastboot mode." };
 		if(!::std::filesystem::exists(imagePath))
-			return ::uft::t<::std::string>("Cannot find given file: ") + imagePath;
-		return Platform::RunCommand("fastboot", { "boot", QString::fromStdString(imagePath)});
+			return { .exitCode = Platform::ERRORS::FILE_DOES_NOT_EXIST, .stderr = ::std::string("Cannot find given file: ") + imagePath };
+		return Platform::RunCommand("fastboot", { "boot", imagePath });
 	}
 
-	::std::string const EnsureADB()
+	void EnsureADB()
 	{
-		return Platform::RunCommand("adb", { "start-server" });
+		Platform::RunCommand("adb", { "start-server" });
 	}
 
 }

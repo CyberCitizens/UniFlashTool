@@ -5,16 +5,7 @@
 #define UFT_DEPS
 
 #include <sstream>
-#include <QApplication>
-#include <QPushButton>
-#include <QVBoxLayout>
-#include <QWidget>
-#include <QProcess>
-#include <QDir>
-#include <QMessageBox>
-#include <QClipboard>
-#include <QTextEdit>
-
+#include <fstream>
 #include <archive.h>
 #include <archive_entry.h>
 
@@ -22,7 +13,15 @@
 #include <curlpp/cURLpp.hpp>
 #include <curlpp/Options.hpp>
 
-#include "../gui/Translate.hpp"
+#include <deque>
+#include <thread>
+#include "../renewed/migration.hpp"
+#include "../renewed/replace/strings_on_steroids.hpp"
+#include "../renewed/interactions.hpp"
+#include "../../libs/json.hpp"
+
+#include <reproc++/run.hpp>
+#include <reproc++/drain.hpp>
 
 // This byte is "NAK"; Not Acknowledged. Used when an error occurs. Look for that in a returned
 // string to know if something's wrong with a returned result. Or Use CheckForCommandExecution(::std::string const& output).
@@ -36,6 +35,7 @@ namespace uft::Platform
 		WINDOWS,
 		APPLE,
 		LINUX,
+		UNKNOWN_64,
 	};
 
 	// Enumeration used to know which package manager to use
@@ -56,6 +56,16 @@ namespace uft::Platform
 		ADD_USER_TO_ANDROID_GROUP,	// Command to add current user to relevant Android groups and be able to use Android tools
 	};
 
+	enum ERRORS
+	{
+		NO_ERROR,
+		INVALID_FILE_TYPE,
+		FILE_DOES_NOT_EXIST,
+		NO_DEVICE_ATTACHED,
+		DEVICE_NOT_READY,
+		UNKNOWN = -1,
+	};
+
 	static ::std::map<::std::string, LINUX_DISTRIBUTION> const LINUX_DISTRIBUTIONS
 	{
 		{	"Generic"	,	GENERIC	},
@@ -63,6 +73,12 @@ namespace uft::Platform
 		{	"Arch"		,	ARCH	},
 		{	"Gentoo"	,	GENTOO	},
 	};
+
+	typedef struct {
+		int exitCode;
+		std::string stdout;
+		std::string stderr;
+	} ProcessResult;
 	
 	// Returns an enum value telling the current platform we're working with.
 	PLATFORM GetPlatform();
@@ -75,12 +91,14 @@ namespace uft::Platform
 	// Ensures a tool is present by looking for a predicateString in the output (stdout) of a given command.
 	bool EnsureTool(::std::string command, ::std::string predicateString);
 	// Runs a command and returns the output.
-	::std::string RunCommand(const std::string& cmd, QStringList const& args = {}, int timeout = -1);
-	::std::string RunCommand(const std::string& cmd, QStringList const& args, int timeout, QTextEdit* log);
+	ProcessResult RunCommand(const std::string& cmd, arglist const& args = {}, int timeout = -1);
+	// Runs an asynchronous command and specify what to do on output with a lambda expression or a callback function.
+	ProcessResult RunCommand(const std::string& cmd, ::std::function<void(::std::string_view)> onWrite, arglist const& args = {}, int timeout = -1);
 	// Installs ADB, Fastboot and other needed tools to communicate with Android devices.
 	bool InstallAndroidTools();
 	// Returns true if no error has been found in output.
 	bool CheckForCommandExecution(::std::string const& output);
+	bool CheckForCommandExecution(ProcessResult const& result);
 	// Just an alias for CheckForCommandExecution
 	inline bool Check(::std::string const& output) { return CheckForCommandExecution(output); };
 	// Returns true if the user is in the given group.
