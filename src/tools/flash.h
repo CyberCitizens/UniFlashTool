@@ -63,6 +63,11 @@ namespace uft::Tools::Flash
 
 	void WaitForState(DEVICE_STATE state); // Blocks this thread (without burning the CPU) until the device reaches a certain state.
 
+	// If 0, uses USB connection. If different than 0, uses TCP binding on said port.
+	// Sets the port that will be used for Android Debug Bridge and restarts its server.
+	Platform::ProcessResult const SetAdbPort(uint16_t const port);
+	// Retrieves the port that is currently configured to be used by ADB.
+	uint16_t const GetAdbPort();
 	bool HasDevice(); // ADB check to know if there is a device connected.
 	// Gets the name of the currently connected device
 	::std::string const GetConnectedDeviceCodename();

@@ -2,6 +2,30 @@
 
 namespace uft::Tools::Flash
 {
+	// If 0, uses USB connection. If different than 0, uses TCP binding on said port.
+	static ::std::atomic<uint16_t> ADB_PORT = 0;
+
+	Platform::ProcessResult const SetAdbPort(uint16_t const port)
+	{
+		EnsureADB();
+		ADB_PORT = port;
+		Platform::ProcessResult pr;
+		if(ADB_PORT)
+			pr = Platform::RunCommand("adb", {
+				"connect",
+				"localhost:" + ::std::to_string(port)
+			}, 3000);
+		else
+			pr = Platform::RunCommand("adb", {
+				"start-server"
+			}, 3000);
+		return pr;
+	}
+
+	uint16_t const GetAdbPort()
+	{
+		return ADB_PORT;
+	}
 	
 	void WaitForState(DEVICE_STATE state)
 	{
@@ -14,6 +38,8 @@ namespace uft::Tools::Flash
 	
 	::std::string const GetConnectedDeviceCodename()
 	{
+		if(!HasDevice())
+			return "No device is connected.";
 		auto pr = Platform::RunCommand("adb", { "shell", "getprop", "ro.product.device" });
 		if(pr.exitCode)
 		{
@@ -26,7 +52,8 @@ namespace uft::Tools::Flash
 	
 	bool HasDevice()
 	{
-		auto pr = Platform::RunCommand("adb", { "devices" });
+		EnsureADB();
+		auto pr = Platform::RunCommand("adb", { "devices" }, 3000);
 		if(pr.exitCode)
 			return false;
 		::std::string const exec = pr.stdout;
@@ -199,7 +226,18 @@ namespace uft::Tools::Flash
 
 	void EnsureADB()
 	{
-		Platform::RunCommand("adb", { "start-server" });
+		::reproc::options options;
+		::reproc::process process;
+		options.redirect.parent = false;
+		options.redirect.discard = true;
+		options.nonblocking = true;
+		options.stop = {
+			{ ::reproc::stop::terminate, ::reproc::milliseconds(2000) },
+			{ ::reproc::stop::kill,      ::reproc::milliseconds(1000) },
+			{ ::reproc::stop::wait,      ::reproc::milliseconds(0) }
+		};
+
+		auto errcode = process.start(::std::deque<::std::string>{"adb", "start-server"}, options);
 	}
 
 }

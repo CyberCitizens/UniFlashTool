@@ -41,7 +41,7 @@ namespace uft::Platform
 		::reproc::process process;
 		options.redirect.parent = false;
 		args.pop_front();
-		auto pr = RunCommand(programName, args);
+		auto pr = RunCommand(programName, args, 3000);
 		if(!pr.exitCode)
 			return pr.stdout.find(predicateString.c_str()) != ::std::string::npos;
 		return false;
@@ -51,10 +51,19 @@ namespace uft::Platform
 	ProcessResult RunCommand(const std::string& cmd, arglist const& args, int timeout)
 	{
 		auto programName = cmd;
+		auto fullCommand = args;
+		fullCommand.push_front(cmd);
 		::reproc::options options;
 		::reproc::process process;
-		options.redirect.parent = false;
-		::std::error_code error = process.start(args);
+		options.redirect.parent = true;
+		options.nonblocking = false;
+		options.stop = {
+			{ ::reproc::stop::terminate, ::reproc::milliseconds(2000) },
+			{ ::reproc::stop::kill,      ::reproc::milliseconds(1000) },
+			{ ::reproc::stop::wait,      ::reproc::milliseconds(0) }
+		};
+		
+		::std::error_code error = process.start(fullCommand, options);
 		if(error)
 			return {
 				.exitCode = error.value(),
@@ -77,6 +86,11 @@ namespace uft::Platform
 	{
 		reproc::process process;
 		reproc::options options;
+		options.stop = {
+			{ ::reproc::stop::terminate, ::reproc::milliseconds(2000) },
+			{ ::reproc::stop::kill,      ::reproc::milliseconds(1000) },
+			{ ::reproc::stop::wait,      ::reproc::milliseconds(0) }
+		};
 		auto err = process.start(args, options);
 		if (err) return
 		{

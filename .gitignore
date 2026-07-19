@@ -5,4 +5,5 @@ build/
 .vscode/
 data/repos/default/
 event.json
+cf_images/
 !*repo.json

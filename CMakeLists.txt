@@ -47,7 +47,6 @@ set(BUILD_CTL OFF CACHE BOOL "" FORCE)          # disabled CLI
 set(COZ_PROFILING OFF CACHE BOOL "" FORCE)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)  # static build
 
-# https://github.com/DaanDeMeyer/reproc
 
 FetchContent_Declare(
 	reproc
@@ -64,15 +63,11 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(drogon)
 
-# ---- Ton exécutable, sans Qt ----
 add_executable(uniflashtool
 	src/main.cpp
-#	src/webserver/HttpServer.cpp
-#	src/webserver/HttpServer.hpp
-#	src/webserver/WsController.cpp
-#	src/webserver/WsController.hpp
-#	src/webserver/AuthFilter.cpp
-#	src/webserver/AuthFilter.hpp
+	src/server/HttpServer.cpp
+	src/server/WsController.cpp
+	src/server/AuthFilter.cpp
 	src/platform/deps.cpp
 	src/renewed/replace/strings_on_steroids.cpp
 	src/renewed/interactions.cpp
@@ -83,7 +78,6 @@ add_executable(uniflashtool
 	src/tools/Config.cpp
 )
 
-# macOS bundle si tu veux garder un .app propre
 if(APPLE)
 	set_target_properties(uniflashtool PROPERTIES
 		MACOSX_BUNDLE TRUE
@@ -107,7 +101,6 @@ target_link_libraries(uniflashtool PRIVATE
 	reproc++
 )
 
-# ---- Copie des assets front (HTML/JS/CSS statiques) à côté du binaire ----
 add_custom_command(TARGET uniflashtool POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_directory
 		${CMAKE_SOURCE_DIR}/web
