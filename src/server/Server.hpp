@@ -10,6 +10,7 @@ namespace uft::server
 		ADD_METHOD_TO(UftController::GetDevices, "/api/devices", drogon::Get);
 		// Handles a bunch of submethods about ADB.
 		ADD_METHOD_TO(UftController::HandleADB, "/api/adb", drogon::Post);
+		ADD_METHOD_TO(UftController::GetDeviceState, "api/device_state", ::drogon::Get);
 		METHOD_LIST_END
 
 		// Returns a list of the connected devices, usable with ADB.
@@ -18,6 +19,8 @@ namespace uft::server
 		// Handles a bunch of submethods about ADB.
 		void HandleADB(const drogon::HttpRequestPtr& req,
 			std::function<void(const drogon::HttpResponsePtr&)>&& callback);
+		// Returns a string describing the current device's state.
+		void GetDeviceState(::drogon::HttpRequestPtr const& request, ::std::function<void(::drogon::HttpResponsePtr const&)> && callback);
 		
 };
 

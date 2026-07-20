@@ -15,10 +15,11 @@ namespace uft::Tools::Flash
 				"connect",
 				"localhost:" + ::std::to_string(port)
 			}, 3000);
-		else
-			pr = Platform::RunCommand("adb", {
-				"start-server"
-			}, 3000);
+		if(pr.stdout == "Connection refused")
+		{
+			pr.exitCode = Platform::ERRORS::CONNECTION_REFUSED;
+			pr.stderr = pr.stdout;
+		}
 		return pr;
 	}
 
@@ -90,10 +91,12 @@ namespace uft::Tools::Flash
 	DEVICE_STATE const GetConnectedDeviceState()
 	{
 		if(!HasDevice())
+		{
 			if(FastBoot::HasDevice())
 				return STATE_FASTBOOT;
 			else
 				return STATE_NOT_CONNECTED;
+		}
 		auto pr = Platform::RunCommand("adb", { "get-state" });
 		if(pr.exitCode)
 		{

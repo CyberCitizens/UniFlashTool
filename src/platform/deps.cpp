@@ -55,8 +55,6 @@ namespace uft::Platform
 		fullCommand.push_front(cmd);
 		::reproc::options options;
 		::reproc::process process;
-		options.redirect.parent = true;
-		options.nonblocking = false;
 		options.stop = {
 			{ ::reproc::stop::terminate, ::reproc::milliseconds(2000) },
 			{ ::reproc::stop::kill,      ::reproc::milliseconds(1000) },
@@ -68,17 +66,23 @@ namespace uft::Platform
 			return {
 				.exitCode = error.value(),
 				.stderr = error.message(),
+				.procerror = error.message(),
 			};
 		std::string out, err;
 		reproc::sink::string sinkOut(out), sinkErr(err);
 		error = reproc::drain(process, sinkOut, sinkErr);
 		int status = 0;
 		::std::tie(status, error) = process.wait(timeout == -1 ? ::reproc::infinite : ::reproc::milliseconds(timeout));
+		if (out.length())
+			out = out.substr(0, out.length() - 1);
+		if (err.length())
+			err = err.substr(0, err.length() - 1);
 		return
 		{
 			.exitCode = error.value(),
 			.stdout = out,
 			.stderr = err,
+			.procerror = error.message(),
 		};
 	}
 
@@ -96,6 +100,7 @@ namespace uft::Platform
 		{
 			.exitCode = err.value(),
 			.stderr = err.message(),
+			.procerror = err.message(),
 		};
 		::std::string dummyString;
 		reproc::sink::string dummy(dummyString);
@@ -111,6 +116,7 @@ namespace uft::Platform
 			{
 				.exitCode = err.value(),
 				.stderr = err.message(),
+				.procerror = err.message(),
 			};
 
 			if(onWrite)

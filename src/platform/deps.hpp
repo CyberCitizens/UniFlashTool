@@ -63,6 +63,7 @@ namespace uft::Platform
 		FILE_DOES_NOT_EXIST,
 		NO_DEVICE_ATTACHED,
 		DEVICE_NOT_READY,
+		CONNECTION_REFUSED,
 		UNKNOWN = -1,
 	};
 
@@ -78,6 +79,7 @@ namespace uft::Platform
 		int exitCode;
 		std::string stdout;
 		std::string stderr;
+		std::string procerror;
 	} ProcessResult;
 	
 	// Returns an enum value telling the current platform we're working with.

@@ -6,7 +6,6 @@
 int main(int argc, char *argv[]) {
 	int errcode = 0;
 	::uft::Tools::Flash::EnsureADB();
-	::uft::Tools::Flash::SetAdbPort(6520);
 	curlpp::initialize();
 	auto server = ::uft::server::Server::GetInstance();
 	server.Run();
