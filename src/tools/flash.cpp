@@ -8,7 +8,7 @@ namespace uft::Tools::Flash
 	Platform::ProcessResult const SetAdbPort(uint16_t const port)
 	{
 		EnsureADB();
-		ADB_PORT = port;
+
 		Platform::ProcessResult pr;
 		if(ADB_PORT)
 			pr = Platform::RunCommand("adb", {
@@ -20,6 +20,8 @@ namespace uft::Tools::Flash
 			pr.exitCode = Platform::ERRORS::CONNECTION_REFUSED;
 			pr.stderr = pr.stdout;
 		}
+		else
+			ADB_PORT = port;
 		return pr;
 	}
 
