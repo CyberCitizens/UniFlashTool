@@ -3,7 +3,7 @@
 namespace uft::Tools
 {
 	// ::std::map<::std::string const, Recovery> Recovery::CachedRecoveryImages{};
-	::std::map<::std::string, ::std::function<Recovery(::std::string const&)>> const& Recovery::RECOVERIES =
+	::std::map<::std::string, ::std::function<Recovery(::std::string const&)>> const Recovery::RECOVERIES =
 	{
 		{ "orangefox",		Recovery::OrangeFox			},
 		{ "pitchblack",		Recovery::PitchBlack		},

@@ -13,7 +13,7 @@ namespace uft::Tools
 		ToolHandler *Origin = ToolHandler::GetDefault();
 		// static ::std::map<::std::string const, Recovery> CachedRecoveryImages;
 	public:
-		::std::map<::std::string, ::std::function<Recovery(::std::string const&)>> static const& RECOVERIES;
+		::std::map<::std::string, ::std::function<Recovery(::std::string const&)>> static const RECOVERIES;
 
 		Recovery() : Tool{} {}
 		Recovery(Tool source);

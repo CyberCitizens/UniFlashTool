@@ -2,6 +2,11 @@
 
 namespace uft::Tools
 {
+	::std::map<::std::string const, ::std::function<ReadOnlyMemory(::std::string const&, ToolHandler* const)>> const ReadOnlyMemory::READONLY_MEMORIES =
+	{
+		{ "lineage", ReadOnlyMemory::Lineage },
+	};
+
 	ReadOnlyMemory::ReadOnlyMemory(
 		Tool _ROM,
 		Tool _DTBO,

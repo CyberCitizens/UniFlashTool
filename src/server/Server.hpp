@@ -8,23 +8,28 @@ namespace uft::server
 	class UftController : public drogon::HttpController<UftController> {
 		public:
 		METHOD_LIST_BEGIN
-		// Returns a list of the connected devices, usable with ADB.
 		ADD_METHOD_TO(UftController::GetDevices, "/api/devices", drogon::Get);
-		// Handles a bunch of submethods about ADB.
 		ADD_METHOD_TO(UftController::HandleADB, "/api/adb", drogon::Post);
 		ADD_METHOD_TO(UftController::GetDeviceState, "/api/device_state", ::drogon::Get);
-		ADD_METHOD_TO(UftController::GetAvailableRecoveryTools, "/api/recovery", ::drogon::Get);
+		ADD_METHOD_TO(UftController::GetAvailableRecoveryTools, "/api/available/recovery", ::drogon::Get);
+		ADD_METHOD_TO(UftController::GetAvailableROMs, "/api/available/rom", ::drogon::Get);
+		ADD_METHOD_TO(UftController::GetAvailable, "/api/available", ::drogon::Get);
 		METHOD_LIST_END
 
-		// Returns a list of the connected devices, usable with ADB.
+		// Responds a list of the connected devices, usable with ADB.
 		void GetDevices(const drogon::HttpRequestPtr& req,
 			std::function<void(const drogon::HttpResponsePtr&)>&& callback);
 		// Handles a bunch of submethods about ADB.
 		void HandleADB(const drogon::HttpRequestPtr& req,
 			std::function<void(const drogon::HttpResponsePtr&)>&& callback);
-		// Returns a string describing the current device's state.
+		// Responds a string describing the current device's state.
 		void GetDeviceState(::drogon::HttpRequestPtr const& request, ::std::function<void(::drogon::HttpResponsePtr const&)> && callback);
+		// Responds an array of available recovery tools, phone-agnostic-ly.
 		void GetAvailableRecoveryTools(DROGON_DEFAULT_ARGS);
+		// Responds an array of available ROM, phone-agnostic-ly.
+		void GetAvailableROMs(DROGON_DEFAULT_ARGS);
+		// Responds an array of available tools.
+		void GetAvailable(DROGON_DEFAULT_ARGS);
 };
 
 	

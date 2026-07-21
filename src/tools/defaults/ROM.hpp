@@ -28,6 +28,7 @@ namespace uft::Tools
 			ToolHandler * const _Origin = 0
 		);
 
+		::std::map<::std::string const, ::std::function<ReadOnlyMemory(::std::string const&, ToolHandler* const)>> static const READONLY_MEMORIES;
 		static ReadOnlyMemory const Lineage(::std::string const& device, ToolHandler * const _Origin = 0);
 
 		// Sets or add (if not already present) this tool as a holder of this tool's role (tool type).

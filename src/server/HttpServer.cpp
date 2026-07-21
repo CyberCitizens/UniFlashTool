@@ -65,13 +65,30 @@ namespace uft::server
 		jsonResponse["state"] = ::uft::Tools::Flash::DEVICE_STATES.at(::uft::Tools::Flash::GetConnectedDeviceState());
 		callback(DROGON_ANSWER_JSON(jsonResponse));
 	}
-	
+
 	void UftController::GetAvailableRecoveryTools(DROGON_DEFAULT_ARGS)
 	{
 		Json::Value jsonResponse;
-		::std::vector<::std::string> recovery_tools;
+		for(auto const& pair : ::uft::Tools::Recovery::RECOVERIES)
+			jsonResponse.append(pair.first);
+		callback(DROGON_ANSWER_JSON(jsonResponse));
+	}
+
+	void UftController::GetAvailableROMs(DROGON_DEFAULT_ARGS)
+	{
+		Json::Value jsonResponse;
+		for(auto const& pair : ::uft::Tools::ReadOnlyMemory::READONLY_MEMORIES)
+			jsonResponse.append(pair.first);
+		callback(DROGON_ANSWER_JSON(jsonResponse));
+	}
+
+	void UftController::GetAvailable(DROGON_DEFAULT_ARGS)
+	{
+		Json::Value jsonResponse;
 		for(auto const& pair : ::uft::Tools::Recovery::RECOVERIES)
 			jsonResponse["recovery"].append(pair.first);
+		for(auto const& pair : ::uft::Tools::ReadOnlyMemory::READONLY_MEMORIES)
+			jsonResponse["readonlymemory"].append(pair.first);
 		callback(DROGON_ANSWER_JSON(jsonResponse));
 	}
 }

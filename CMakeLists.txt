@@ -1,25 +1,28 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.25)
 cmake_policy(SET CMP0144 OLD)
 project(UniversalFlashingTool)
 
 set(REPROC++ ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+option(ENABLE_ASAN "Enable AddressSanitizer" ON)
 
 if(MSVC)
 	add_compile_options(/W3 /utf-8)
 	set(CMAKE_CXX_FLAGS_DEBUG "/Od /Zi")
 else()
 	add_compile_options(-pipe)
-	set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
-	if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ASAN_FLAGS}")
-	endif()
 
-	set(CMAKE_CXX_FLAGS_DEBUG "-march=native -O0 -g ${ASAN_FLAGS}")
+	# Flags de base, SANS ASan
+	set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3 -pipe")
-	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
-	set(CMAKE_SHARED_LINKER_FLAGS_DEBUG "${CMAKE_SHARED_LINKER_FLAGS_DEBUG} -fsanitize=address")
-	link_libraries(-fsanitize=address)
+
+	# ASan uniquement en Debug ET si explicitement demandé
+	if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND ENABLE_ASAN)
+		set(ASAN_FLAGS "-fsanitize=address -fno-omit-frame-pointer")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ASAN_FLAGS}")
+		set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+		set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
+	endif()
 endif()
 
 set(CMAKE_CXX_STANDARD 20)
@@ -28,7 +31,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 include(FetchContent)
 
-# ---- Cache persistant pour éviter de rebuild Drogon à chaque clean ----
 set(FETCHCONTENT_BASE_DIR "${CMAKE_SOURCE_DIR}/.deps_cache" CACHE PATH "")
 
 find_package(LibArchive REQUIRED)

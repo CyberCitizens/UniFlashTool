@@ -6,4 +6,5 @@ build/
 data/repos/default/
 event.json
 cf_images/
+*.zst
 !*repo.json
