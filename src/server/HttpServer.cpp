@@ -3,7 +3,7 @@
 namespace uft::server
 {
 
-	::std::map<::std::string, ::std::function<void(Json::Value&,::std::string const&)>> static const match =
+	::std::map<::std::string, ::std::function<void(Json::Value&,::std::string const&)>> static const ADB_METHODS_MATCH =
 	{
 		// Sets listening port for ADB
 		{ "set_port", [](Json::Value& jsonResponse, ::std::string const& param) -> void {
@@ -47,23 +47,31 @@ namespace uft::server
 		
 		::std::string command = data.get("command", "noData").asString();
 		::std::string args = data.get("args", "").asString();
-		if(match.contains(command))
+		if(ADB_METHODS_MATCH.contains(command))
 		{
 			// Call matching function
-			match.at(command)(jsonResponse, args);
+			ADB_METHODS_MATCH.at(command)(jsonResponse, args);
 		}
 		else
 		{
 			jsonResponse["error"] = "Cannot send an empty request";
 		}
-		callback(::drogon::HttpResponse::newHttpJsonResponse(jsonResponse));
+		callback(DROGON_ANSWER_JSON(jsonResponse));
 	}
 
 	void UftController::GetDeviceState(::drogon::HttpRequestPtr const& request, ::std::function<void(::drogon::HttpResponsePtr const&)> && callback)
 	{
 		Json::Value jsonResponse;
 		jsonResponse["state"] = ::uft::Tools::Flash::DEVICE_STATES.at(::uft::Tools::Flash::GetConnectedDeviceState());
-		callback(::drogon::HttpResponse::newHttpJsonResponse(jsonResponse));
+		callback(DROGON_ANSWER_JSON(jsonResponse));
 	}
 	
+	void UftController::GetAvailableRecoveryTools(DROGON_DEFAULT_ARGS)
+	{
+		Json::Value jsonResponse;
+		::std::vector<::std::string> recovery_tools;
+		for(auto const& pair : ::uft::Tools::Recovery::RECOVERIES)
+			jsonResponse["recovery"].append(pair.first);
+		callback(DROGON_ANSWER_JSON(jsonResponse));
+	}
 }

@@ -8,6 +8,7 @@
 #include <fstream>
 #include <archive.h>
 #include <archive_entry.h>
+#include <array>
 
 #include <curlpp/Easy.hpp>
 #include <curlpp/cURLpp.hpp>
