@@ -28,8 +28,18 @@ namespace uft::server
 		void GetAvailableRecoveryTools(DROGON_DEFAULT_ARGS);
 		// Responds an array of available ROM, phone-agnostic-ly.
 		void GetAvailableROMs(DROGON_DEFAULT_ARGS);
+		// Responds an array of available rooting tools, phone-agnostic-ly.
+		void GetAvailableTools(DROGON_DEFAULT_ARGS);
 		// Responds an array of available tools.
 		void GetAvailable(DROGON_DEFAULT_ARGS);
+
+#pragma region TOOLS
+		// Adds a tool to the library.
+		void AddTool(DROGON_DEFAULT_ARGS);
+		// Removes a tool from the library.
+		void RemoveTool(DROGON_DEFAULT_ARGS);
+		// Downloads all tools staged for download in library.
+		void DownloadTools(DROGON_DEFAULT_ARGS);
 };
 
 	
@@ -45,6 +55,9 @@ namespace uft::server
 		}
 
 		public:
+
+		static inline uint16_t GetPort() { return GetInstance().SERVER_PORT; }
+		
 		static inline Server& GetInstance(uint16_t const port = 6767)
 		{
 			if(instance)
