@@ -3,6 +3,12 @@
 
 #define DROGON_DEFAULT_ARGS const ::drogon::HttpRequestPtr& request, std::function<void(const ::drogon::HttpResponsePtr&)>&& callback
 #define DROGON_ANSWER_JSON(response) ::drogon::HttpResponse::newHttpJsonResponse(response)
+#define ABORT_REQUEST(message, label) \
+	{ \
+		jsonResponse["error"] = message; \
+		goto label; \
+	}
+
 namespace uft::server
 {
 	class UftController : public drogon::HttpController<UftController> {
@@ -14,6 +20,9 @@ namespace uft::server
 		ADD_METHOD_TO(UftController::GetAvailableRecoveryTools, "/api/available/recovery", ::drogon::Get);
 		ADD_METHOD_TO(UftController::GetAvailableROMs, "/api/available/rom", ::drogon::Get);
 		ADD_METHOD_TO(UftController::GetAvailable, "/api/available", ::drogon::Get);
+
+		ADD_METHOD_TO(UftController::AddTool, "/api/tools", ::drogon::Post);
+
 		METHOD_LIST_END
 
 		// Responds a list of the connected devices, usable with ADB.

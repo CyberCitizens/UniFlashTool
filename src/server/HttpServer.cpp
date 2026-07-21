@@ -42,6 +42,12 @@ namespace uft::server
 			callback(drogon::HttpResponse::newHttpJsonResponse(jsonResponse));
 			return;
 		}
+		if(!req->getJsonObject())
+		{
+			jsonResponse["error"] = "Got sent an empty body";
+			callback(drogon::HttpResponse::newHttpJsonResponse(jsonResponse));
+			return;
+		}
 		Json::Value data = *req->getJsonObject();
 		::drogon::HttpResponsePtr response;
 		
@@ -89,6 +95,28 @@ namespace uft::server
 			jsonResponse["recovery"].append(pair.first);
 		for(auto const& pair : ::uft::Tools::ReadOnlyMemory::READONLY_MEMORIES)
 			jsonResponse["readonlymemory"].append(pair.first);
+		callback(DROGON_ANSWER_JSON(jsonResponse));
+	}
+
+	void UftController::AddTool(DROGON_DEFAULT_ARGS)
+	{
+		Json::Value jsonResponse;
+		Json::Value jsonRequest;
+		if(!request->bodyLength())
+			ABORT_REQUEST("Empty body means no tool to add. Aborting request.", ADDTOOL_END);
+		if(!request->getJsonObject())
+			ABORT_REQUEST("Empty JSON object means no tool to add. Aborting request.", ADDTOOL_END);
+
+		jsonRequest = *request->getJsonObject();
+
+		if(!jsonRequest.isMember("tools") || !jsonRequest["tools"].isArray())
+			ABORT_REQUEST("No tool specified for queue in downloads. Aborting request.", ADDTOOL_END);
+		
+		for (auto const toolName : jsonRequest["tools"])
+		{
+			::std::cout << toolName.asString() << ::std::endl;
+		}
+		ADDTOOL_END:
 		callback(DROGON_ANSWER_JSON(jsonResponse));
 	}
 }
