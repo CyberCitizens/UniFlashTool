@@ -60,7 +60,7 @@ namespace uft::server
 
 		Server(uint16_t port) : SERVER_PORT{port}
 		{
-
+			
 		}
 
 		public:

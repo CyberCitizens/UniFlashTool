@@ -1,0 +1,156 @@
+
+:root
+{
+	--light: #b5a4a4;
+	--light-transparent: #b5a4a420;
+
+	--safezone: 16px;
+}
+
+*
+{
+	font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+	font-weight: lighter;
+	color: white;
+	transition: all 200ms ease;
+	box-sizing: border-box;
+}
+
+body
+{
+	background-size: 100vw 100vh;
+	background-origin: border-box;
+	background-image:
+		radial-gradient(circle at bottom, var(--light) 0%, #000f 15%),
+		radial-gradient(circle at top, var(--light) 0%, #000f 15%)
+		;
+}
+
+button
+{
+	border-radius: var(--safezone);
+	border: .2px solid white;
+	background-color: var(--light-transparent);
+	cursor: pointer;
+}
+
+button img[src$=".svg"]
+{
+	filter: invert();
+}
+
+button:hover
+{
+	transform: scale(1.1);
+}
+
+button:active
+{
+	background-color: var(--light);
+}
+
+form.vertical
+{
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+form *
+{
+	background-color: var(--light-transparent);
+	border-radius: var(--safezone);
+	border: .2px solid white;
+	padding: var(--safezone);
+	outline: none;
+}
+
+form *:focus
+{
+	background-color: #000;
+	border: 2px solid white;
+
+}
+
+.box
+{
+	background-color: #aaa1;
+	border-radius: var(--safezone);
+	border: .5px solid white;
+	padding: var(--safezone);
+}
+
+.box::backdrop
+{
+	background-color: #000d;
+}
+
+.box:hover
+{
+	background-color: var(--light-transparent);
+}
+
+.box > .list
+{
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	overflow-y: scroll;
+}
+
+.box .list > *
+{
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: space-between;
+	padding: var(--safezone);
+	border-radius: var(--safezone);
+}
+
+.box .list > *:hover
+{
+	border: solid white .2px;
+	background-color: var(--light-transparent);
+}
+
+.whole-line
+{
+	display: flex;
+	flex-wrap: nowrap;
+	align-items: center;
+	justify-content: space-between;
+}
+
+.vertical-list[download="queued"]::before
+{
+	content: "Queued for download";
+}
+
+.vertical-list[download="queued"]
+{
+	border: solid .2px yellow;
+}
+
+.vertical-list[download="failed"]
+{
+	border: solid .2px red;
+}
+
+.vertical-list[download="available"]
+{
+	border: solid .2px green;
+}
+
+input[required="true"]::before,
+input[required]::before
+{
+	color: red;
+	content: "*";
+}
+
+*:disabled, 
+*[disabled="true"]
+{
+	border: none;
+}

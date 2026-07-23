@@ -27,7 +27,8 @@ namespace uft::server
 	void UftController::GetDevices(const drogon::HttpRequestPtr& req,
 						std::function<void(const drogon::HttpResponsePtr&)>&& callback)
 	{
-		Json::Value devices = ::uft::Tools::Flash::GetConnectedDeviceCodename().c_str();
+		Json::Value devices;
+		devices["codename"] = ::uft::Tools::Flash::GetConnectedDeviceCodename().c_str();
 		auto resp = drogon::HttpResponse::newHttpJsonResponse(devices);
 		callback(resp);
 	}
@@ -100,6 +101,7 @@ namespace uft::server
 
 	void UftController::AddTool(DROGON_DEFAULT_ARGS)
 	{
+		// TODO change this to delete tools, and use this base to parse tool objects from json (talking about this method)
 		Json::Value jsonResponse;
 		Json::Value jsonRequest;
 		if(!request->bodyLength())

@@ -50,7 +50,7 @@ namespace uft::Tools::Flash
 			
 		}
 		::std::string const device = pr.stdout;
-		return device.substr(0, device.size() - 1);
+		return device;
 	}
 	
 	bool HasDevice()

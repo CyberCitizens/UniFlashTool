@@ -11,4 +11,7 @@ build:
 	cmake -S . -B build/ -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_BUILD_TYPE=Release -DENABLE_ASAN=OFF
 	cmake --build build/ --parallel $(JOBS)
 
-.PHONY: dev debug build clean
+run: build
+	build/uniflashtool
+
+.PHONY: dev debug build clean run
