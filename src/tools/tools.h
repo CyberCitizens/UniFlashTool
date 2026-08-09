@@ -102,6 +102,8 @@ namespace uft::Tools
 		::std::optional<::std::string> Source;
 		::std::optional<::std::string> Version; // A specific tag to look for in the versioning system (tag, release, etc.)
 		::std::optional<::std::string> ArchiveName; // Downloaded Archive name (from "{RepositoryRoot}/{ToolName}/" path).
+		::std::optional<::std::string> Brand; // When this tool belongs to a brand (example: "LineageOS for sweet" belongs to "LineageOS")
+		::std::optional<::std::string> Repo; // If null, default repo is the value.
 		size_t Size() const
 		{
 			size_t size = sizeof(char) * Name.size() + sizeof(Type) + sizeof(SourceType);
@@ -111,6 +113,7 @@ namespace uft::Tools
 				size += sizeof(char) * Version->size();
 			return size;
 		}
+		
 		::std::optional<::std::string> const GetFileName() const
 		{
 			if(!ArchiveName)
@@ -120,6 +123,45 @@ namespace uft::Tools
 					*TargetDevice + "/"
 					: ""
 			) + Name + "/" + *ArchiveName;
+		}
+		
+		bool VerifySignature(::std::string const& signature) const
+		{
+			// Will be available to verify CMS signatures in OTA zips for custom ROM builds
+			return true;
+		};
+		
+		::nlohmann::json const Serialize() const
+		{
+			nlohmann::json tool_data;
+			tool_data["name"] = Name;
+			tool_data["type"] = static_cast<int>(Type);
+			if(TargetDevice)
+				tool_data["target_device"] = *TargetDevice;
+			if(Source)
+				tool_data["source"] = *Source;
+			if(SourceType)
+				tool_data["source_type"] = *SourceType;
+			if(Version)
+				tool_data["version"] = *Version;
+			if(ArchiveName)
+				tool_data["archive_name"] = *ArchiveName;
+			if(Brand)
+				tool_data["brand"] = *Brand;
+			return tool_data;
+		}
+
+		::std::string const ToolPath() const
+		{
+			::std::string repoPath = Repo ? *Repo : "data/repos/default";
+			return repoPath + "/" + (TargetDevice ? *TargetDevice + "/" : "") + Name;
+		}
+
+		bool IsDownloaded() const
+		{
+			if(!ArchiveName)
+				return false;
+			return ArchiveName && ::std::filesystem::exists(ToolPath() + "/" + *ArchiveName);
 		}
 	} Tool;
 
@@ -134,8 +176,10 @@ namespace uft::Tools
 			::std::string LocalRepoPath;
 			// Tools that are already downloaded in this local repo
 			::std::deque<Tool> LocalTools;
-			// Downloads 
-			bool Download(Tool* tool, ::std::string const& source);
+			// Downloads a tool. Can call an optional onUpdate function, that if returns false, interrupts the download.
+			// onUpdate returns true as long as the download should not be cancelled, the first double is the total of bytes
+			// expected to be downloaded. The second double argument is the current total progress.
+			bool Download(Tool* tool, ::std::string const& source, ::std::function<bool(double, double)> onUpdate = nullptr);
 			// initiates a ToolHandler with a path pointing to the local tools repository.
 			ToolHandler(::std::string const& localRepo);
 			
@@ -154,7 +198,10 @@ namespace uft::Tools
 			// Loads a local repository configuration.
 			static ToolHandler* Load(::std::string const& RepoPath);
 			// Returns the path to given tool, and if not present, downloads it prior to returning its local path.
-			::std::string Get(Tool tool, bool forceDownload = false);
+			// Can call an optional onUpdate function, that if returns false, interrupts the download.
+			// onUpdate returns true as long as the download should not be cancelled, the first double is the total of bytes
+			// expected to be downloaded. The second double argument is the current total progress.
+			::std::string Get(Tool tool, bool forceDownload = false, bool preventDownload = false, ::std::function<bool(double, double)> onUpdate = nullptr);
 			// Simply adds a tool and tries to download it in repository.
 			void AddTool(Tool tool);
 			// Removes a tool from the repository and from the disk.
@@ -164,7 +211,11 @@ namespace uft::Tools
 			// Also downloads it if it's present but not downloaded.
 			::std::optional<Tool*> Get(::std::string const& toolName, bool fetch = true);
 			// Fetches every tool in this repo (updates if not present) and get them on a vector.
-			::std::deque<Tool> const& GetAll();
+			// Can call an optional onUpdate function, that if returns false, interrupts the download.
+			// onUpdate returns true as long as the download should not be cancelled, the first double is the total of bytes
+			// expected to be downloaded. The second double argument is the current total progress.
+			// First arg is the tool being downloaded, to access its information.
+			::std::deque<Tool> const& GetAll(bool preventDownload = false, ::std::function<bool(Tool*, double, double)> onUpdate = nullptr);
 
 			// Getter for LocalRepoPath.
 			::std::string GetPath() const;

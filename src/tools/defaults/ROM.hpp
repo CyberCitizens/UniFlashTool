@@ -2,6 +2,7 @@
 #define UFT_ROM
 
 #include "Recovery.hpp"
+#include <vector>
 namespace uft::Tools
 {
 	// Complete setup for an install on an Android device
@@ -53,6 +54,20 @@ namespace uft::Tools
 		bool isRoot() const
 		{
 			return Root != ::std::nullopt;
+		}
+
+		inline ::std::vector<Tool> const Tools() const
+		{
+			::std::vector<Tool> _tools;
+			_tools.push_back(ROM);
+			_tools.push_back(DTBO);
+			_tools.push_back(Bootloader);
+			if(Root)
+				_tools.push_back(*Root);
+			if(RootModules)
+				for(auto const& module : *RootModules)
+					_tools.push_back(module);
+			return _tools;
 		}
 	};
 }

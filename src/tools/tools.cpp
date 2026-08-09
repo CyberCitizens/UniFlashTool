@@ -80,6 +80,7 @@ namespace uft::Tools
 
 	::std::map<::std::string const, ToolHandler*> ToolHandler::GetAllRepos()
 	{
+		GetDefault();
 		::std::shared_lock<::std::shared_mutex> slrm(RepoListMutex);
 		return Repos;
 	}
@@ -134,20 +135,7 @@ namespace uft::Tools
 		data["repo_path"] = LocalRepoPath;
 		for(Tool const& tool : LocalTools)
 		{
-			nlohmann::json tool_data;
-			tool_data["name"] = tool.Name;
-			tool_data["type"] = static_cast<int>(tool.Type);
-			if(tool.TargetDevice)
-				tool_data["target_device"] = *tool.TargetDevice;
-			if(tool.Source)
-				tool_data["source"] = *tool.Source;
-			if(tool.SourceType)
-				tool_data["source_type"] = *tool.SourceType;
-			if(tool.Version)
-				tool_data["version"] = *tool.Version;
-			if(tool.ArchiveName)
-				tool_data["archive_name"] = *tool.ArchiveName;
-			data["tools"].push_back(tool_data);
+			data["tools"].push_back(tool.Serialize());
 		}
 
 		file << data.dump(1, '\t');
@@ -177,6 +165,8 @@ namespace uft::Tools
 				tool.SourceType = static_cast<SOURCE_TYPE>(tool_data.value("source_type", 0));
 				if(tool_data.contains("archive_name") && !tool_data["archive_name"].is_null())
 					tool.ArchiveName = tool_data["archive_name"];
+				if(tool_data.contains("brand") && !tool_data["brand"].is_null())
+					tool.Brand = tool_data["brand"];
 				if(tool_data.contains("target_device") && !tool_data["target_device"].is_null())
 					tool.TargetDevice = tool_data["target_device"];
 				if(tool_data.contains("source") && !tool_data["source"].is_null())
@@ -220,10 +210,10 @@ namespace uft::Tools
 		return url.substr(pos + 1);
 	}
 	
-	bool ToolHandler::Download(Tool* tool, ::std::string const& source)
+	bool ToolHandler::Download(Tool* tool, ::std::string const& source, ::std::function<bool(double, double)> onUpdate)
 	{
 		::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);
-		size_t expected_content_length = -1;
+		::std::optional<uint64_t> expected_content_length;
 		if(!tool->Source)
 			tool->Source = source;
 		::std::string const
@@ -235,6 +225,8 @@ namespace uft::Tools
 		if(!archive.is_open())
 			return false;
 		curlpp::Easy handle;
+		handle.setOpt(curlpp::options::SslVerifyPeer(true));
+        handle.setOpt(curlpp::options::SslVerifyHost(2L));
 		handle.setOpt(curlpp::options::Timeout(0));
 		handle.setOpt(curlpp::options::FollowLocation(true));
 		handle.setOpt(curlpp::options::Url(*tool->Source));
@@ -247,6 +239,14 @@ namespace uft::Tools
 				return total_size;
 			}
 		));
+		if(onUpdate)
+		{
+			handle.setOpt(curlpp::options::NoProgress(false));
+			handle.setOpt(::curlpp::options::ProgressFunction([&onUpdate](double total, double now, double, double) -> int
+			{
+				return !static_cast<int>(onUpdate(total, now));
+			}));
+		}
 
 		handle.setOpt(curlpp::options::HeaderFunction(
 			[&tool, &expected_content_length](void* buffer, size_t size, size_t count) -> size_t
@@ -332,7 +332,7 @@ namespace uft::Tools
 
 
 	// Returns the path to given tool, and if not present, downloads it prior to returning its local path.
-	::std::string ToolHandler::Get(Tool tool, bool forceDownload)
+	::std::string ToolHandler::Get(Tool tool, bool forceDownload, bool preventDownload, ::std::function<bool(double, double)> onUpdate)
 	{
 		Tool* toolPtr = 0;
 		::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);
@@ -361,11 +361,15 @@ namespace uft::Tools
 			Save();
 		}
 		// The Tool has already been downloaded, return that path
-		if(toolPtr->ArchiveName && ::std::filesystem::exists(toolPath + "/" + *toolPtr->ArchiveName) && !forceDownload)
-			return toolPath + "/" + *toolPtr->ArchiveName;
-		else if(tool.Source)
+		if(toolPtr->IsDownloaded() && !forceDownload)
 		{
-			if(Download(toolPtr, *tool.Source))
+			if(onUpdate)
+				onUpdate(1, 1);
+			return toolPath + "/" + *toolPtr->ArchiveName;
+		}
+		else if(tool.Source && !preventDownload || forceDownload)
+		{
+			if(Download(toolPtr, *tool.Source, onUpdate))
 				return LocalRepoPath + "/" + *toolPtr->ArchiveName;
 		}
 		return "An error occurred while trying to retrieve a referenced tool.";
@@ -397,7 +401,7 @@ namespace uft::Tools
 		return !LocalTools.empty();
 	}
 	
-	::std::deque<Tool> const& ToolHandler::GetAll()
+	::std::deque<Tool> const& ToolHandler::GetAll(bool preventDownload, ::std::function<bool(Tool* const, double, double)> onUpdate)
 	{
 		std::list<Tool*> toolsToProcess;
 		{
@@ -406,8 +410,17 @@ namespace uft::Tools
 				toolsToProcess.push_back(&tool);
 		}
 
+		::std::vector<::std::jthread> workers;
+
 		for (Tool* tool : toolsToProcess)
-			Get(*tool);
+			workers.push_back(::std::jthread([tool, onUpdate, preventDownload, this]() -> void {
+				Get(*tool, false, preventDownload, [tool, onUpdate](double total, double now) -> bool
+				{
+					if(onUpdate)
+						return onUpdate(tool, total, now);
+					return true;
+				});
+			}));
 
 		{
 			::std::shared_lock<::std::shared_mutex> slrm(RepoMutex);

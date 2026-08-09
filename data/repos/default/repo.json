@@ -1,9 +1,10 @@
 {
 	"repo_path": "data/repos/default",
-	"timestamp": 1776490045,
+	"timestamp": 1786239183,
 	"tools": [
 		{
 			"archive_name": "dtbo.img",
+			"brand": "LineageOS",
 			"name": "LineageOS's DTBO for sweet",
 			"source": "https://mirrorbits.lineageos.org/full/sweet/20260416/dtbo.img",
 			"source_type": 3,
@@ -12,6 +13,7 @@
 		},
 		{
 			"archive_name": "PBRP-sweet-4.0-20230917-1245-OFFICIAL.zip?viasf=1.zip",
+			"brand": "PitchBlack Recovery",
 			"name": "PitchBlack Recovery for sweet",
 			"source": "https://sourceforge.net/projects/pbrp/files/sweet/PBRP-sweet-4.0-20230917-1245-OFFICIAL.zip/download",
 			"source_type": 1,
@@ -20,6 +22,7 @@
 		},
 		{
 			"archive_name": "boot.img",
+			"brand": "LineageOS",
 			"name": "LineageOS's boot for sweet",
 			"source": "https://mirrorbits.lineageos.org/full/sweet/20260416/boot.img",
 			"source_type": 3,
@@ -28,6 +31,7 @@
 		},
 		{
 			"archive_name": "lineage-23.2-20260416-nightly-sweet-signed.zip",
+			"brand": "LineageOS",
 			"name": "LineageOS for sweet",
 			"source": "https://mirrorbits.lineageos.org/full/sweet/20260416/lineage-23.2-20260416-nightly-sweet-signed.zip",
 			"source_type": 1,
@@ -36,6 +40,7 @@
 		},
 		{
 			"archive_name": "PlayIntegrityFix.zip",
+			"brand": "LineageOS",
 			"name": "PlayIntegrityFix",
 			"source": "https://github.com/KOWX712/PlayIntegrityFix/releases/download/v4.5-inject-s/PlayIntegrityFix_v4.5-inject-s.zip",
 			"source_type": 0,
@@ -43,6 +48,7 @@
 		},
 		{
 			"archive_name": "Shamiko.zip",
+			"brand": "Shamiko",
 			"name": "Shamiko",
 			"source": "https://github.com/LSPosed/LSPosed.github.io/releases/download/shamiko-414/Shamiko-v1.2.5-414-release.zip",
 			"source_type": 0,
@@ -50,6 +56,7 @@
 		},
 		{
 			"archive_name": "PlaycurlNEXT.zip",
+			"brand": "PlaycurlNEXT",
 			"name": "PlaycurlNEXT",
 			"source": "https://github.com/daboynb/playcurlNEXT/releases/download/v1.19/playcurlNEXT.zip",
 			"source_type": 0,
@@ -57,6 +64,7 @@
 		},
 		{
 			"archive_name": "Magisk.zip",
+			"brand": "Magisk",
 			"name": "Magisk",
 			"source": "https://github.com/topjohnwu/Magisk/releases/download/v30.7/Magisk-v30.7.apk",
 			"source_type": 0,

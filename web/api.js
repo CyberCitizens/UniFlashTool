@@ -25,7 +25,13 @@ export class Query
 	static put(e, b) { return this.request("PUT", e, b); }
 	static delete(e) { return this.request("DELETE", e); }
 
+	static GetEndpoint() { return `${this.host}:${this.port}`}
 };
+
+
+const DownloadWS = new WebSocket(`${Query.GetEndpoint()}/ws/download`);
+const FlashWS = new WebSocket(`${Query.GetEndpoint()}/ws/flash`);
+
 
 // Ready-to-use calls to the rUFT API
 // The server only allows localhost so it's secure by design.
@@ -33,14 +39,20 @@ export class Query
 // INSTALL A DAMN CUSTOM ROM
 export class Handy
 {
+	static async getDownloadable() { return await Query.get("/api/downloadable"); }
 	static async getAvailable() { return await Query.get("/api/available"); }
 	static async getAvailableROMs() { return await Query.get("/api/available/rom"); }
 	static async getAvailableRecoveries() { return await Query.get("/api/available/recovery"); }
 	static async getAvailableRootModules() { return await Query.get("/api/available/stealth"); }
 	static async getCodename() { return await Query.get("/api/devices"); }
+	static async addTools(tools) { return await Query.post("/api/tools", tools); } // doesn't work, I got to investigate why
+	static getDownloadSocket()	{ return DownloadWS; }
+	static getFlashSocket()		{ return FlashWS; }
 }
 
 export default {
 	Query,
-	Handy
+	Handy,
+	DownloadWS,
+	FlashWS,
 }

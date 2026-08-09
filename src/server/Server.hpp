@@ -1,4 +1,7 @@
 #include "../tools/Config.hpp"
+#include "drogon/HttpAppFramework.h"
+#include "drogon/WebSocketController.h"
+#include "trantor/net/EventLoop.h"
 #include <drogon/drogon.h>
 
 #define DROGON_DEFAULT_ARGS const ::drogon::HttpRequestPtr& request, std::function<void(const ::drogon::HttpResponsePtr&)>&& callback
@@ -11,6 +14,50 @@
 
 namespace uft::server
 {
+	struct DownloadSession
+	{
+		std::atomic<bool> cancelled{false};
+		std::atomic<bool> running{false};
+		::std::atomic<::trantor::EventLoop*> loop{nullptr};
+		std::deque<std::string> toolIds;
+		std::thread worker;
+		std::chrono::steady_clock::time_point lastSend{};
+		
+		~DownloadSession() {
+			cancelled = true;
+			// if (worker.joinable()) worker.join();
+		}
+	};
+
+	struct FlashSession
+	{
+		std::atomic<bool> cancelled{false};
+		std::atomic<bool> running{false};
+		::std::atomic<::trantor::EventLoop*> loop{nullptr};
+		std::jthread worker;
+		~FlashSession() {
+			cancelled = true;
+			if (worker.joinable()) worker.join();
+		}
+	};
+
+	enum WS_MESSAGE
+	{
+		LAUNCH,
+		STOP,
+		SET,
+	};
+
+	::std::map<::std::string, WS_MESSAGE> const WsMessage =
+	{
+		{ "start" , LAUNCH },
+		{ "launch" , LAUNCH },
+		{ "stop" , STOP },
+		{ "cancel" , STOP },
+		{ "abort" , STOP },
+		{ "set" , SET },
+	};
+	
 	class UftController : public drogon::HttpController<UftController> {
 		public:
 		METHOD_LIST_BEGIN
@@ -20,8 +67,12 @@ namespace uft::server
 		ADD_METHOD_TO(UftController::GetAvailableRecoveryTools, "/api/available/recovery", ::drogon::Get);
 		ADD_METHOD_TO(UftController::GetAvailableROMs, "/api/available/rom", ::drogon::Get);
 		ADD_METHOD_TO(UftController::GetAvailable, "/api/available", ::drogon::Get);
+		ADD_METHOD_TO(UftController::GetDownloadable, "/api/downloadable", ::drogon::Get);
 
 		ADD_METHOD_TO(UftController::AddTool, "/api/tools", ::drogon::Post);
+		ADD_METHOD_TO(UftController::RemoveTool, "/api/tools", ::drogon::Post);
+
+		
 
 		METHOD_LIST_END
 
@@ -41,15 +92,49 @@ namespace uft::server
 		void GetAvailableTools(DROGON_DEFAULT_ARGS);
 		// Responds an array of available tools.
 		void GetAvailable(DROGON_DEFAULT_ARGS);
+		// Responds an array of available tools for download.
+		void GetDownloadable(DROGON_DEFAULT_ARGS);
 
 #pragma region TOOLS
 		// Adds a tool to the library.
 		void AddTool(DROGON_DEFAULT_ARGS);
 		// Removes a tool from the library.
 		void RemoveTool(DROGON_DEFAULT_ARGS);
-		// Downloads all tools staged for download in library.
-		void DownloadTools(DROGON_DEFAULT_ARGS);
+		// Downloads all tools staged for download in library. (NOW AVAILABLE THROUGH A WEBSOCKET)
+		// void DownloadTools(DROGON_DEFAULT_ARGS);
 };
+
+	class FlashController : public drogon::WebSocketController<FlashController>
+	{
+	public:
+		WS_PATH_LIST_BEGIN
+		WS_PATH_ADD("/ws/flash", drogon::Get);
+		WS_PATH_LIST_END
+
+		void handleNewConnection(::drogon::HttpRequestPtr const& request, const drogon::WebSocketConnectionPtr& conn);
+		void handleNewMessage(const drogon::WebSocketConnectionPtr& conn,
+			std::string&& message,
+			const drogon::WebSocketMessageType& type);
+		void handleConnectionClosed(const drogon::WebSocketConnectionPtr& conn);
+	};
+
+	class DownloadController : public drogon::WebSocketController<DownloadController>
+	{
+		public:
+		WS_PATH_LIST_BEGIN
+
+		WS_PATH_ADD("/ws/download", drogon::Get);
+		
+		WS_PATH_LIST_END
+
+
+		void handleNewConnection(::drogon::HttpRequestPtr const& request, const drogon::WebSocketConnectionPtr& conn);
+		void handleNewMessage(const drogon::WebSocketConnectionPtr& conn,
+			std::string&& message,
+			const drogon::WebSocketMessageType& type);
+		void handleConnectionClosed(const drogon::WebSocketConnectionPtr& conn);
+
+	};
 
 	
 	class Server
@@ -76,6 +161,13 @@ namespace uft::server
 				throw "Could not allocate enough space for a server. This usually happens if your system is out of memory.";
 				
 			return *instance;
+		}
+
+		static inline bool IsOriginValid(::std::string const& origin)
+		{
+			::std::string static const validip = "127.0.0.1:" + ::std::to_string(GetPort());
+			::std::string static const validhost = "localhost:" + ::std::to_string(GetPort());
+			return origin.ends_with(validip) || origin.ends_with(validhost);
 		}
 
 		inline void Run()
